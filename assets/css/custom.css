@@ -1051,37 +1051,35 @@ html[data-theme="dark"] .archive-tag-toggle:focus-visible {
 }
 
 .library-link-copy {
+  position: relative;
   min-width: 0;
   max-width: 46rem;
+  padding-inline-start: 1.2rem;
+}
+
+.library-link-copy::before {
+  content: "";
+  position: absolute;
+  inset-block: 0.12rem;
+  inset-inline-start: 0;
+  width: 2px;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0.34rem 0 0 var(--accent-soft);
+  pointer-events: none;
 }
 
 .library-link-section .section-heading {
   margin-bottom: 0.8rem;
 }
 
-.library-link-section .library-link-subtitle {
-  margin: 0.35rem 0 0;
-  color: var(--muted);
-  font-family: var(--font-ui-latin);
-  font-size: 0.92rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  line-height: 1.4;
+.library-link-section .section-label {
+  color: var(--accent);
 }
 
-.library-link-copy > p:not(.library-link-meta) {
+.library-link-description {
   margin: 0;
   max-width: 42rem;
-}
-
-.library-link-copy .library-link-meta {
-  margin: 0.8rem 0 0;
-  color: var(--muted);
-  font-family: var(--font-ui-latin);
-  font-size: 0.84rem;
-  font-weight: 600;
-  letter-spacing: 0.025em;
-  line-height: 1.5;
 }
 
 .library-link-action {
@@ -1090,7 +1088,25 @@ html[data-theme="dark"] .archive-tag-toggle:focus-visible {
 }
 
 .library-link-action span {
-  margin-left: 0.38rem;
+  display: inline-block;
+  margin-inline-start: 0.38rem;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.library-link-action:hover span,
+.library-link-action:focus-visible span {
+  transform: translate(0.12rem, -0.12rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .library-link-action span {
+    transition: none;
+  }
+
+  .library-link-action:hover span,
+  .library-link-action:focus-visible span {
+    transform: none;
+  }
 }
 
 .todo-section-heading {
@@ -2236,6 +2252,10 @@ pre code {
   .library-link-layout {
     grid-template-columns: minmax(0, 1fr);
     gap: 1.15rem;
+  }
+
+  .library-link-copy {
+    padding-inline-start: 1rem;
   }
 
   .library-link-action {
