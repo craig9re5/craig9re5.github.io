@@ -427,6 +427,64 @@ html[data-theme="dark"] .about-card::after {
   outline: none !important;
 }
 
+.site-nav .nav-library-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.52rem;
+}
+
+.nav-library-mark {
+  position: relative;
+  width: 0.82rem;
+  height: 0.9rem;
+  flex: 0 0 auto;
+  color: var(--accent);
+}
+
+.nav-library-mark::before,
+.nav-library-mark::after {
+  content: "";
+  position: absolute;
+  width: 0.48rem;
+  height: 0.66rem;
+  border: 1.4px solid currentColor;
+  border-radius: 2px 3px 3px 2px;
+  transform-origin: bottom left;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav-library-mark::before {
+  top: 0.04rem;
+  left: 0.05rem;
+  background: var(--surface);
+  opacity: 0.52;
+  transform: rotate(-8deg);
+}
+
+.nav-library-mark::after {
+  right: 0.04rem;
+  bottom: 0.02rem;
+  background: var(--accent-soft);
+  transform: rotate(2deg);
+}
+
+.site-nav .nav-library-link:hover .nav-library-mark::before,
+.site-nav .nav-library-link:focus-visible .nav-library-mark::before {
+  transform: translate(-0.05rem, -0.03rem) rotate(-12deg);
+}
+
+.site-nav .nav-library-link:hover .nav-library-mark::after,
+.site-nav .nav-library-link:focus-visible .nav-library-mark::after {
+  transform: translate(0.04rem, -0.02rem) rotate(4deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-library-mark::before,
+  .nav-library-mark::after {
+    transition: none;
+  }
+}
+
 .site-nav a:hover,
 .site-nav a:focus,
 .site-nav a:active {
