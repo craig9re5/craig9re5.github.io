@@ -985,6 +985,56 @@ html[data-theme="dark"] .archive-tag-toggle:focus-visible {
   grid-template-columns: minmax(0, 1.8fr) minmax(260px, 1fr);
 }
 
+.library-link-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.library-link-copy {
+  min-width: 0;
+  max-width: 46rem;
+}
+
+.library-link-section .section-heading {
+  margin-bottom: 0.8rem;
+}
+
+.library-link-section .library-link-subtitle {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  font-family: var(--font-ui-latin);
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+}
+
+.library-link-copy > p:not(.library-link-meta) {
+  margin: 0;
+  max-width: 42rem;
+}
+
+.library-link-copy .library-link-meta {
+  margin: 0.8rem 0 0;
+  color: var(--muted);
+  font-family: var(--font-ui-latin);
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  line-height: 1.5;
+}
+
+.library-link-action {
+  min-height: 44px;
+  white-space: nowrap;
+}
+
+.library-link-action span {
+  margin-left: 0.38rem;
+}
+
 .todo-section-heading {
   align-items: flex-end;
   margin-bottom: 1rem;
@@ -2123,6 +2173,15 @@ pre code {
   .archive-list li,
   .two-column {
     display: block;
+  }
+
+  .library-link-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.15rem;
+  }
+
+  .library-link-action {
+    justify-self: start;
   }
 
   .todo-section-heading {
