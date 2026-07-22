@@ -13,16 +13,12 @@ hide_page_heading: true
       <p class="about-eyebrow">Profile</p>
 
       <div class="about-profile-identity">
-        <p class="about-name">芥川クレゴ</p>
+        <p class="about-name">クレゴ</p>
         <div class="about-avatar-shell">
-          <img class="about-avatar" src="{{ '/assets/avatar-favicon.png' | relative_url }}" alt="Profile photo of Kurego Akutagawa">
+          <img class="about-avatar" src="{{ '/assets/avatar-favicon.png' | relative_url }}" alt="Profile photo of Kurego">
         </div>
       </div>
     </div>
-
-    <p class="about-role" lang="en">A builder of things, writer of code, and quiet chronicler of daily discoveries.</p>
-
-
 
     <div class="about-contact-row" aria-label="Contact links">
       <a class="about-icon-link" href="https://github.com/craig9re5" target="_blank" rel="noreferrer" aria-label="GitHub">
@@ -36,26 +32,5 @@ hide_page_heading: true
         </svg>
       </a>
     </div>
-  </div>
-</section>
-
-<section class="about-grid">
-  <div class="about-card">
-    <p class="about-eyebrow">Theme</p>
-    <h2>Ideation & Expression</h2>
-    <p>
-      I strive to capture build logs, development notes, and fleeting insights gathered while coding and debugging—preserving them before they wash away.
-    </p>
-    <p>
-      Alongside these, I reflect on deeper thoughts that exceed the boundaries of brief updates, writing pieces that invite reflection and stand the test of time.
-    </p>
-  </div>
-
-  <div class="about-card">
-    <p class="about-eyebrow">Philosophy</p>
-    <h2>Space to Breathe</h2>
-    <p>
-      A personal site endures when the friction to write is low. I believe design should serve the writing—sitting quietly in the background rather than competing for the spotlight.
-    </p>
   </div>
 </section>

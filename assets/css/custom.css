@@ -1077,11 +1077,6 @@ html[data-theme="dark"] .archive-tag-toggle:focus-visible {
   color: var(--accent);
 }
 
-.library-link-description {
-  margin: 0;
-  max-width: 42rem;
-}
-
 .library-link-action {
   min-height: 44px;
   white-space: nowrap;
