@@ -1751,13 +1751,14 @@ html[data-theme="dark"] .todo-due-chip.is-overdue {
   margin-bottom: 1rem;
 }
 
-.about-quote {
+.about-page .about-quote {
   max-width: 48rem;
-  margin: 1.35rem 0 0;
-  padding: 1rem 1.35rem 1rem 1.45rem;
+  margin: 1rem 0 0;
+  padding: 0 0 0 1.15rem;
+  border: 0;
   border-inline-start: 2px solid var(--accent);
-  border-radius: 0 16px 16px 0;
-  background: linear-gradient(90deg, var(--card-grad-primary-start), transparent 78%);
+  border-radius: 0;
+  background: none;
   color: var(--accent-deep);
   font-family: var(--font-display-ja);
   font-size: clamp(1.12rem, 2.1vw, 1.48rem);
@@ -1803,6 +1804,10 @@ html[data-theme="dark"] .todo-due-chip.is-overdue {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 1rem 1.7rem;
   align-items: center;
+}
+
+.about-profile-copy {
+  min-width: 0;
 }
 
 .about-name {
@@ -1955,11 +1960,19 @@ html[data-theme="dark"] .todo-due-chip.is-overdue {
   transition: transform 140ms ease, background-color 140ms ease, color 140ms ease, border-color 140ms ease;
 }
 
-.about-icon-link:hover {
+.about-page .about-icon-link:hover,
+.about-page .about-icon-link:focus-visible,
+.about-page .about-icon-link:active {
   background: var(--accent-deep);
-  color: #ffffff;
+  color: #ffffff !important;
   border-color: var(--accent-deep);
   transform: translateY(-1px);
+}
+
+.about-page .about-icon-link:hover svg,
+.about-page .about-icon-link:focus-visible svg,
+.about-page .about-icon-link:active svg {
+  fill: #ffffff !important;
 }
 
 .about-icon-link svg {
