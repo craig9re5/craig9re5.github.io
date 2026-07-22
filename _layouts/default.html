@@ -14,7 +14,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,300..800;1,6..72,300..800&display=swap">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+JP:wght@500;700&family=Noto+Serif+SC:wght@500;700&family=Noto+Serif+TC:wght@500;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+JP:wght@500;700&display=swap">
     <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
     <link rel="stylesheet" href="{{ '/assets/css/custom.css?v=' | append: site.github.build_revision | relative_url }}">
     {% include favicon.html %}
@@ -94,56 +94,161 @@
 
     <script>
       (function () {
-        // High-performance pointer tracking for global liquid glass elements
+        var panelSelector = '.site-nav, .home-hero, .content-section, .page-shell, .post-card, .todo-card';
+        var spotlightQuery = window.matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)');
         var activePanels = [];
-        var updateScheduled = false;
+        var activeInnermostPanel = null;
+        var frameId = 0;
         var lastMouseX = -999;
         var lastMouseY = -999;
+        var geometryDirty = false;
+        var trackingEnabled = false;
 
-        function cacheActivePanels() {
-          activePanels = Array.prototype.slice.call(
-            document.querySelectorAll('.site-nav, .home-hero, .content-section, .page-shell, .post-card, .todo-card')
-          );
+        function closestPanel(target) {
+          return target && target.closest ? target.closest(panelSelector) : null;
         }
 
-        // Cache elements on load and when DOM changes
-        window.addEventListener('DOMContentLoaded', cacheActivePanels);
-        // Backup call in case DOM ready already fired
-        if (document.readyState === 'interactive' || document.readyState === 'complete') {
-          cacheActivePanels();
+        function buildPanelStack(panel) {
+          var panels = [];
+          while (panel) {
+            panels.push(panel);
+            panel = panel.parentElement ? panel.parentElement.closest(panelSelector) : null;
+          }
+          return panels;
+        }
+
+        function findActivePanel(panel) {
+          for (var i = 0; i < activePanels.length; i++) {
+            if (activePanels[i].element === panel) {
+              return activePanels[i];
+            }
+          }
+          return null;
+        }
+
+        function setActivePanel(panel) {
+          if (panel === activeInnermostPanel) return;
+
+          var nextPanelElements = buildPanelStack(panel);
+          var nextPanels = [];
+
+          for (var i = 0; i < nextPanelElements.length; i++) {
+            var existingPanel = findActivePanel(nextPanelElements[i]);
+            nextPanels.push(existingPanel || {
+              element: nextPanelElements[i],
+              rect: nextPanelElements[i].getBoundingClientRect()
+            });
+          }
+
+          for (var j = 0; j < activePanels.length; j++) {
+            if (nextPanelElements.indexOf(activePanels[j].element) === -1) {
+              activePanels[j].element.style.removeProperty('--mouse-x');
+              activePanels[j].element.style.removeProperty('--mouse-y');
+            }
+          }
+
+          activePanels = nextPanels;
+          activeInnermostPanel = panel;
+        }
+
+        function scheduleUpdate() {
+          if (!frameId && activePanels.length) {
+            frameId = requestAnimationFrame(updateSpotlights);
+          }
         }
 
         function updateSpotlights() {
-          updateScheduled = false;
-          var x = lastMouseX;
-          var y = lastMouseY;
-          
-          for (var i = 0; i < activePanels.length; i++) {
-            var panel = activePanels[i];
-            var rect = panel.getBoundingClientRect();
-            
-            // Only update active styles if mouse is within 180px margin of the element
-            if (x >= rect.left - 180 && x <= rect.right + 180 &&
-                y >= rect.top - 180 && y <= rect.bottom + 180) {
-              var localX = x - rect.left;
-              var localY = y - rect.top;
-              panel.style.setProperty('--mouse-x', localX.toFixed(1) + 'px');
-              panel.style.setProperty('--mouse-y', localY.toFixed(1) + 'px');
+          frameId = 0;
+          if (!activePanels.length) return;
+
+          var i;
+          if (geometryDirty) {
+            for (i = 0; i < activePanels.length; i++) {
+              activePanels[i].rect = activePanels[i].element.getBoundingClientRect();
             }
+            geometryDirty = false;
+          }
+
+          for (i = 0; i < activePanels.length; i++) {
+            var activePanel = activePanels[i];
+            var localX = lastMouseX - activePanel.rect.left;
+            var localY = lastMouseY - activePanel.rect.top;
+            activePanel.element.style.setProperty('--mouse-x', localX.toFixed(1) + 'px');
+            activePanel.element.style.setProperty('--mouse-y', localY.toFixed(1) + 'px');
           }
         }
 
-        function onMouseMove(e) {
-          lastMouseX = e.clientX;
-          lastMouseY = e.clientY;
-          if (!updateScheduled) {
-            updateScheduled = true;
-            requestAnimationFrame(updateSpotlights);
+        function onPointerOver(event) {
+          setActivePanel(closestPanel(event.target));
+        }
+
+        function onPointerOut(event) {
+          setActivePanel(closestPanel(event.relatedTarget));
+        }
+
+        function onPointerMove(event) {
+          lastMouseX = event.clientX;
+          lastMouseY = event.clientY;
+
+          // pointerover normally establishes the active stack first. Checking
+          // the current target also keeps it correct after scroll-driven hit
+          // target changes without scanning unrelated panels.
+          var hoveredPanel = closestPanel(event.target);
+          if (hoveredPanel !== activeInnermostPanel) {
+            setActivePanel(hoveredPanel);
+          }
+          scheduleUpdate();
+        }
+
+        function onGeometryChange() {
+          geometryDirty = true;
+          scheduleUpdate();
+        }
+
+        function startTracking() {
+          if (trackingEnabled) return;
+          trackingEnabled = true;
+          document.addEventListener('pointerover', onPointerOver, { passive: true });
+          document.addEventListener('pointerout', onPointerOut, { passive: true });
+          document.addEventListener('pointermove', onPointerMove, { passive: true });
+          window.addEventListener('scroll', onGeometryChange, { passive: true, capture: true });
+          window.addEventListener('resize', onGeometryChange, { passive: true });
+        }
+
+        function stopTracking() {
+          if (!trackingEnabled) return;
+          trackingEnabled = false;
+          document.removeEventListener('pointerover', onPointerOver);
+          document.removeEventListener('pointerout', onPointerOut);
+          document.removeEventListener('pointermove', onPointerMove);
+          window.removeEventListener('scroll', onGeometryChange, true);
+          window.removeEventListener('resize', onGeometryChange);
+
+          if (frameId) {
+            cancelAnimationFrame(frameId);
+            frameId = 0;
+          }
+
+          setActivePanel(null);
+          geometryDirty = false;
+          lastMouseX = -999;
+          lastMouseY = -999;
+        }
+
+        function syncTrackingPreference() {
+          if (spotlightQuery.matches) {
+            startTracking();
+          } else {
+            stopTracking();
           }
         }
 
-        window.addEventListener('mousemove', onMouseMove, { passive: true });
-        window.addEventListener('resize', cacheActivePanels, { passive: true });
+        if (spotlightQuery.addEventListener) {
+          spotlightQuery.addEventListener('change', syncTrackingPreference);
+        } else {
+          spotlightQuery.addListener(syncTrackingPreference);
+        }
+        syncTrackingPreference();
       })();
     </script>
   </body>

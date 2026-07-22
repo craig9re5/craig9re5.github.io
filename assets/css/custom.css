@@ -389,6 +389,44 @@ html[data-theme="dark"] .about-card::after {
   opacity: 1;
 }
 
+/* Keep the glass treatment lightweight when precise hover motion is unavailable
+   or when the visitor has requested reduced motion. */
+@media (pointer: coarse), (hover: none), (prefers-reduced-motion: reduce) {
+  body::before,
+  body::after {
+    animation: none;
+    filter: blur(80px);
+  }
+
+  .site-nav::after,
+  .home-hero::after,
+  .content-section::after,
+  .page-shell::after,
+  .post-card::after,
+  .todo-card::after,
+  .note-card::after,
+  .about-card::after {
+    display: none;
+  }
+
+  .home-hero::before,
+  .content-section::before,
+  .page-shell::before,
+  .post-card::before,
+  .todo-card::before,
+  .note-card::before,
+  .about-card::before {
+    backdrop-filter: blur(12px) saturate(135%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(135%) !important;
+  }
+
+  .site-nav::before,
+  html[data-theme="dark"] .site-nav::before {
+    backdrop-filter: blur(18px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
+  }
+}
+
 /* Hover dynamic scaling (Tactile feeling) */
 .post-card,
 .todo-card,
