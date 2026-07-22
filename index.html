@@ -27,13 +27,6 @@ lang: en-US
     <article class="post-card" data-local-post-item data-post-file="{{ post.name | escape }}"{% if forloop.index > 3 %} hidden{% endif %}>
       <p class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</p>
       <h3><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h3>
-      {% if post.tags and post.tags.size > 0 %}
-      <div class="tag-row tag-row-compact" aria-label="Post tags">
-        {% for tag in post.tags limit: 3 %}
-        <span class="tag-chip tag-chip-compact">{{ tag }}</span>
-        {% endfor %}
-      </div>
-      {% endif %}
       <p>{{ post.excerpt | strip_html | truncate: 150 }}</p>
     </article>
     {% endfor %}

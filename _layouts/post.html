@@ -12,13 +12,6 @@ layout: default
     <header class="page-heading page-heading-post">
         <p class="post-date">{{ page.date | date: "%B %-d, %Y" }}</p>
         <h1>{{ page.title }}</h1>
-        {% if page.tags and page.tags.size > 0 %}
-        <div class="tag-row tag-row-post" aria-label="Post tags">
-            {% for tag in page.tags %}
-            <span class="tag-chip">{{ tag }}</span>
-            {% endfor %}
-        </div>
-        {% endif %}
     </header>
 
     <div class="post-local-edit" id="post-local-edit" data-post-file="{{ page.name | escape }}" hidden>
