@@ -25,7 +25,7 @@ hide_page_heading: true
 
 
     <div class="about-contact-row" aria-label="Contact links">
-      <a class="about-icon-link" href="https://github.com/Craig-Akutagawa" target="_blank" rel="noreferrer" aria-label="GitHub">
+      <a class="about-icon-link" href="https://github.com/craig9re5" target="_blank" rel="noreferrer" aria-label="GitHub">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12 2C6.48 2 2 6.58 2 12.23c0 4.52 2.87 8.35 6.84 9.7.5.1.68-.22.68-.49 0-.24-.01-1.03-.01-1.86-2.78.62-3.37-1.21-3.37-1.21-.46-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.9 1.56 2.35 1.11 2.92.85.09-.67.35-1.11.63-1.37-2.22-.26-4.55-1.14-4.55-5.09 0-1.13.39-2.06 1.03-2.79-.1-.26-.45-1.31.1-2.73 0 0 .84-.27 2.75 1.06A9.3 9.3 0 0 1 12 6.84c.85 0 1.71.12 2.5.36 1.9-1.33 2.74-1.06 2.74-1.06.56 1.42.21 2.47.11 2.73.64.73 1.03 1.66 1.03 2.79 0 3.96-2.33 4.82-4.56 5.08.36.32.68.95.68 1.92 0 1.39-.01 2.5-.01 2.84 0 .27.18.59.69.49A10.26 10.26 0 0 0 22 12.23C22 6.58 17.52 2 12 2Z"/>
         </svg>
