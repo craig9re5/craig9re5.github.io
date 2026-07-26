@@ -17,11 +17,10 @@ const toggleLibraryButton = document.querySelector("#toggle-library");
 const libraryToggleLabel = document.querySelector("#library-toggle-label");
 const libraryCurrentMeta = document.querySelector("#library-current-meta");
 const composerModeChip = document.querySelector("#composer-mode-chip");
-const editingFileEl = document.querySelector("#editing-file");
+const composerHeading = document.querySelector("#composer-heading");
 const bodyInput = document.querySelector("#body");
 const statusEl = document.querySelector("#status");
 const fileNameEl = document.querySelector("#file-name");
-const outputMetaEl = document.querySelector("#output-meta");
 const previewHost = document.querySelector("#preview-host");
 const previewTitle = document.querySelector("#preview-title");
 const previewDate = document.querySelector("#preview-date");
@@ -31,13 +30,10 @@ const imagePicker = document.querySelector("#image-picker");
 const connectionChip = document.querySelector("#connection-chip");
 const connectionCopy = document.querySelector("#connection-copy");
 const selectedTagsEl = document.querySelector("#selected-tags");
-const availableTagsEl = document.querySelector("#available-tags");
-const saveButton = document.querySelector("#save-post");
-const saveAndNewButton = document.querySelector("#save-and-new");
-const publishButton = document.querySelector("#publish-post");
+const savePublishButton = document.querySelector("#save-publish-post");
+const downloadButton = document.querySelector("#download-post");
 const passwordInput = document.querySelector("#post-password");
 const ENCRYPTED_SIG = "::ENCRYPTED::";
-const downloadButton = document.querySelector("#download-post");
 const insertLocalImageButton = document.querySelector("#insert-local-image");
 const insertRemoteImageButton = document.querySelector("#insert-remote-image");
 const toolbarButtons = document.querySelectorAll("[data-action]");
@@ -62,6 +58,9 @@ const state = {
   lastSavedContext: null,
   publishing: false,
   dirtyBaseline: "",
+  lastRenderedBody: null,
+  originalPublished: undefined,
+  originalEncrypted: false,
   pendingEditFile: requestedEditFile
 };
 
@@ -117,23 +116,24 @@ function formatListDate(post) {
 }
 
 function slugFromTitle(title) {
-  const normalized = title
+  return title
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .replace(/&/g, " and ")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
 
-  if (normalized) {
-    return normalized;
-  }
-
+// \u7eaf\u4e2d\u6587\u6807\u9898\u8f6c\u4e0d\u51fa slug\uff0c\u8fd9\u65f6\u624d\u7528"\u65f6\u95f4+\u968f\u673a"\u515c\u5e95\u3002
+// \u53ea\u80fd\u5728\u771f\u6b63\u8981\u843d\u76d8\u65f6\u8c03\u7528\uff08\u751f\u6210\u6587\u4ef6\u540d\u3001\u5efa\u56fe\u7247\u76ee\u5f55\uff09\u3002
+// \u4ee5\u524d\u5b83\u85cf\u5728 slugFromTitle \u91cc\uff0c\u800c syncSlugFromTitle \u6bcf\u6b21\u6309\u952e\u90fd\u4f1a\u8dd1\uff0c
+// \u7ed3\u679c\u9875\u9762\u4e00\u52a0\u8f7d\uff08\u6807\u9898\u8fd8\u7a7a\u7740\uff09\u5c31\u628a\u968f\u673a\u4e32\u5199\u6b7b\u8fdb slug \u8f93\u5165\u6846\uff0c
+// \u4e4b\u540e\u518d\u6539\u6807\u9898\u4e5f\u4e0d\u4f1a\u66f4\u65b0\u2014\u2014_posts \u91cc 0026-b9a / 2338-1fm / 2051-dwb
+// \u8fd9\u4e09\u4e2a\u6c38\u4e45 URL \u5c31\u662f\u8fd9\u4e48\u6765\u7684\u3002
+function generateFallbackSlug() {
   const date = publishInput.value ? new Date(publishInput.value) : new Date();
-  const timePart = [
-    pad(date.getHours()),
-    pad(date.getMinutes())
-  ].join("");
+  const timePart = pad(date.getHours()) + pad(date.getMinutes());
   const randomPart = Math.random().toString(36).slice(2, 5).padEnd(3, "0");
   return timePart + "-" + randomPart;
 }
@@ -146,33 +146,22 @@ function safeSlug(value) {
     .replace(/^-+|-+$/g, "");
 }
 
-function plainText(markdown) {
-  return markdown
-    .replace(/```[\s\S]*?```/g, " ")
-    .replace(/`([^`]+)`/g, "$1")
-    .replace(/\!\[([^\]]*)\]\(([^)]+)\)/g, "$1")
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1")
-    .replace(/[*_>#~-]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
+// 项目规则（.agents/AGENTS.md）：摘要没有手写时必须是空字符串，
+// 不允许由脚本从正文里截一段自动生成。
 function buildExcerpt() {
-  const manual = excerptInput.value.trim();
-  if (manual) {
-    return manual;
-  }
-
-  const raw = plainText(bodyInput.value);
-  if (!raw) {
-    return "";
-  }
-
-  return raw.length > 88 ? raw.slice(0, 88).trim() + "..." : raw;
+  return excerptInput.value.trim();
 }
 
+// 标题或摘要里粘进换行/制表符时，不转义会直接写出断行的 front matter，
+// Jekyll 那边就是一个解析错误。
 function yamlString(value) {
-  return "\"" + value.replace(/\\/g, "\\\\").replace(/"/g, "\\\"") + "\"";
+  const escaped = String(value)
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, "\\\"")
+    .replace(/\r/g, "\\r")
+    .replace(/\n/g, "\\n")
+    .replace(/\t/g, "\\t");
+  return "\"" + escaped + "\"";
 }
 
 function normalizeTag(value) {
@@ -240,7 +229,10 @@ function parseYamlScalar(value) {
   }
 
   if (trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
-    return trimmed.slice(1, -1).replace(/\\"/g, "\"").replace(/\\\\/g, "\\");
+    // 与 yamlString 对称地还原，否则含换行的标题读回来会带着字面的 \n
+    return trimmed.slice(1, -1).replace(/\\([\\"nrt])/g, (_, char) => (
+      { n: "\n", r: "\r", t: "\t" }[char] || char
+    ));
   }
 
   if (trimmed.startsWith("'") && trimmed.endsWith("'")) {
@@ -339,7 +331,11 @@ function parsePostDocument(fileName, source, lastModified) {
     assetSlug: assetSlugFromFileName(fileName),
     encrypted: fields.encrypted === true || fields.encrypted === "true",
     encrypted_data: fields.encrypted_data || "",
-    encrypted_excerpt: fields.encrypted_excerpt || ""
+    encrypted_excerpt: fields.encrypted_excerpt || "",
+    // "隐藏并发布到网站"是靠服务端往 front matter 写 published: false 实现的。
+    // buildMarkdown 会整份重建 front matter，这个键必须带回来，
+    // 否则改个错字再保存就把文章重新公开了。
+    published: fields.published === false || fields.published === "false" ? false : undefined
   };
 }
 
@@ -439,10 +435,6 @@ function renderSelectedTags() {
   }).join("");
 }
 
-function renderAvailableTags() {
-  // Unified rendering is handled inside renderSelectedTags()
-}
-
 function renderPreviewTags() {
   if (!state.selectedTags.length) {
     previewTags.innerHTML = "";
@@ -458,9 +450,8 @@ function renderPreviewTags() {
 
 function renderTags() {
   renderSelectedTags();
-  renderAvailableTags();
   renderPreviewTags();
-  persistDraft();
+  schedulePersistDraft();
 }
 
 function getCurrentSlug() {
@@ -471,9 +462,28 @@ function getCurrentSlug() {
   return safeSlug(slugInput.value.trim()) || slugFromTitle(titleInput.value.trim());
 }
 
+// 需要一个确定可用的 slug 时（落盘文件名、建图片目录）才调这个。
+// 不要在 renderPreview 这类每次按键都会跑的路径里调用。
+function ensureSlug() {
+  const current = getCurrentSlug();
+  if (current) {
+    return current;
+  }
+
+  const generated = generateFallbackSlug();
+  slugInput.value = generated;
+  state.slugTouched = true;
+  return generated;
+}
+
 function buildFileName() {
   if (state.mode === "edit" && state.originalFileName) {
     return state.originalFileName;
+  }
+
+  const slug = getCurrentSlug();
+  if (!slug) {
+    return "";
   }
 
   const sourceDate = publishInput.value ? new Date(publishInput.value) : new Date();
@@ -482,7 +492,7 @@ function buildFileName() {
     pad(sourceDate.getMonth() + 1),
     pad(sourceDate.getDate())
   ].join("-");
-  return datePart + "-" + getCurrentSlug() + ".md";
+  return datePart + "-" + slug + ".md";
 }
 
 function buildMarkdown() {
@@ -515,9 +525,9 @@ function buildMarkdown() {
     finalBody = "> 本文已加密保护，请在浏览器中输入密码访问。";
   }
 
-  if (finalExcerpt) {
-    lines.push("excerpt: " + yamlString(finalExcerpt));
-  }
+  // 必须无条件写出：省略 excerpt 键的话 Jekyll 会自己拿正文首段当摘要，
+  // 那正是 .agents/AGENTS.md 明令禁止的自动摘要。空摘要要落成 excerpt: ""。
+  lines.push("excerpt: " + yamlString(finalExcerpt));
 
   lines.push("lang: " + langInput.value);
   if (state.selectedTags.length) {
@@ -525,6 +535,11 @@ function buildMarkdown() {
     state.selectedTags.forEach((tag) => {
       lines.push("  - " + yamlString(tag));
     });
+  }
+
+  // 保留"隐藏并发布到网站"写下的下架标记，别让一次普通保存把文章重新公开。
+  if (state.originalPublished === false) {
+    lines.push("published: false");
   }
 
   lines.push("---");
@@ -539,34 +554,28 @@ function setStatus(message, kind) {
   statusEl.className = "status-text" + (kind ? " " + kind : "");
 }
 
+const SAVE_PUBLISH_IDLE_LABEL = "保存并发送";
+
 function setPublishAvailability(context) {
   state.lastSavedContext = context;
+}
 
-  if (!publishButton) {
+// 界面上只有一个主按钮，它必须在整个「保存 → 检查 Git → 推送」过程中说明自己在做什么，
+// 并且全程禁用——否则连点两下会发出两次保存请求。
+function setBusyState(active, activeLabel) {
+  state.publishing = Boolean(active);
+
+  if (!savePublishButton) {
     return;
   }
 
-  if (!context) {
-    publishButton.classList.add("hidden");
-    publishButton.disabled = false;
-    publishButton.textContent = "发布到网站";
-    return;
-  }
-
-  publishButton.classList.remove("hidden");
-  publishButton.disabled = false;
-  publishButton.textContent = "发布到网站";
+  savePublishButton.disabled = Boolean(active);
+  savePublishButton.textContent = active ? activeLabel : SAVE_PUBLISH_IDLE_LABEL;
+  savePublishButton.classList.toggle("is-busy", Boolean(active));
 }
 
 function setPublishingState(active, activeLabel = "正在发布...") {
-  state.publishing = active;
-
-  if (!publishButton) {
-    return;
-  }
-
-  publishButton.disabled = active || !state.lastSavedContext;
-  publishButton.textContent = active ? activeLabel : "发布到网站";
+  setBusyState(active, activeLabel);
 }
 
 function setConnectionState(mode, text, detail) {
@@ -590,9 +599,34 @@ function updateEditorStats() {
 }
 
 function syncSlugFromTitle() {
-  if (state.mode === "create" && !state.slugTouched) {
-    slugInput.value = getCurrentSlug();
+  if (state.mode !== "create" || state.slugTouched) {
+    return;
   }
+  // 每次都从标题重新推导，而不是读回输入框里上一轮写进去的值，
+  // 否则一旦写进去就再也跟不上标题了。
+  slugInput.value = slugFromTitle(titleInput.value.trim());
+}
+
+// 所有对正文的程序化改写都走这里：用 execCommand("insertText") 而不是直接赋值
+// bodyInput.value，否则浏览器原生的撤销栈会被清空，Ctrl+Z 撤不回工具栏的操作。
+function applyEditorEdit(start, end, text, selectionStart, selectionEnd) {
+  bodyInput.focus();
+  bodyInput.setSelectionRange(start, end);
+
+  let inserted = false;
+  try {
+    inserted = document.execCommand("insertText", false, text);
+  } catch (error) {
+    inserted = false;
+  }
+
+  if (!inserted) {
+    // execCommand 不可用时退回 setRangeText，撤销栈会丢，但至少功能可用。
+    bodyInput.setRangeText(text, start, end, "end");
+    bodyInput.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+
+  bodyInput.setSelectionRange(selectionStart, selectionEnd);
 }
 
 function wrapSelection(before, after, placeholder) {
@@ -600,41 +634,82 @@ function wrapSelection(before, after, placeholder) {
   const end = bodyInput.selectionEnd;
   const value = bodyInput.value;
   const selected = value.slice(start, end);
+
+  // 再点一次同一个按钮 = 取消格式。分两种情况：标记在选区外侧，或标记被一起选中。
+  const outerStart = start - before.length;
+  const outerEnd = end + after.length;
+  if (
+    selected
+    && outerStart >= 0
+    && value.slice(outerStart, start) === before
+    && value.slice(end, outerEnd) === after
+  ) {
+    applyEditorEdit(outerStart, outerEnd, selected, outerStart, outerStart + selected.length);
+    return;
+  }
+
+  if (
+    selected.length >= before.length + after.length
+    && selected.startsWith(before)
+    && selected.endsWith(after)
+  ) {
+    const inner = selected.slice(before.length, selected.length - after.length);
+    applyEditorEdit(start, end, inner, start, start + inner.length);
+    return;
+  }
+
   const content = selected || placeholder;
-  bodyInput.value = value.slice(0, start) + before + content + after + value.slice(end);
   const cursorStart = start + before.length;
-  const cursorEnd = cursorStart + content.length;
-  bodyInput.focus();
-  bodyInput.setSelectionRange(cursorStart, cursorEnd);
-  renderPreview();
+  applyEditorEdit(start, end, before + content + after, cursorStart, cursorStart + content.length);
 }
 
-function insertAtSelection(snippet, selectStartOffset = 0, selectEndOffset = 0) {
+// 默认把光标留在插入内容的末尾。以前默认是把整段插入内容选中，
+// 于是插完分割线或图片，随手一打字就把它整个删掉了。
+function insertAtSelection(snippet, selectStartOffset = snippet.length, selectEndOffset = 0) {
   const start = bodyInput.selectionStart;
   const end = bodyInput.selectionEnd;
-  const value = bodyInput.value;
-  bodyInput.value = value.slice(0, start) + snippet + value.slice(end);
-  bodyInput.focus();
-  bodyInput.setSelectionRange(start + selectStartOffset, start + snippet.length - selectEndOffset);
-  renderPreview();
+  applyEditorEdit(start, end, snippet, start + selectStartOffset, start + snippet.length - selectEndOffset);
+}
+
+// 行首块级标记：标题、引用、任务列表、无序列表、有序列表
+const BLOCK_PREFIX_PATTERN = /^(\s*)(?:#{1,6}[ \t]+|>[ \t]?|[-*+][ \t]+\[[ xX]\][ \t]+|[-*+][ \t]+|\d+\.[ \t]+)/;
+
+function stripBlockPrefix(line) {
+  return line.replace(BLOCK_PREFIX_PATTERN, "$1");
 }
 
 function prefixSelectedLines(prefixFactory) {
   const value = bodyInput.value;
   const selectionStart = bodyInput.selectionStart;
   const selectionEnd = bodyInput.selectionEnd;
+  const collapsed = selectionStart === selectionEnd;
   const lineStart = value.lastIndexOf("\n", selectionStart - 1) + 1;
   const lineEndIndex = value.indexOf("\n", selectionEnd);
   const lineEnd = lineEndIndex === -1 ? value.length : lineEndIndex;
-  const block = value.slice(lineStart, lineEnd);
-  const replacement = block
-    .split("\n")
-    .map((line, index) => prefixFactory(index) + line)
-    .join("\n");
-  bodyInput.value = value.slice(0, lineStart) + replacement + value.slice(lineEnd);
-  bodyInput.focus();
-  bodyInput.setSelectionRange(lineStart, lineStart + replacement.length);
-  renderPreview();
+  const lines = value.slice(lineStart, lineEnd).split("\n");
+  const prefixes = lines.map((_, index) => prefixFactory(index));
+
+  // 整块都已经是这个标记时，再点一次就去掉它
+  const allPrefixed = lines.every((line, index) => line.startsWith(prefixes[index]));
+  const nextLines = allPrefixed
+    ? lines.map((line, index) => line.slice(prefixes[index].length))
+    // 先剥掉原有的块级标记，避免点了 H1 再点 H2 变成 "## # 标题"
+    : lines.map((line, index) => prefixes[index] + stripBlockPrefix(line));
+  const replacement = nextLines.join("\n");
+
+  if (collapsed) {
+    // 只是把光标停在某一行上就点了按钮：改完让光标留在原来的位置（按首行长度变化平移），
+    // 而不是把整行选中——否则接着打字会把刚加的标记连同整行一起替换掉。
+    const firstLineDelta = nextLines[0].length - lines[0].length;
+    const caret = Math.min(
+      Math.max(selectionStart + firstLineDelta, lineStart),
+      lineStart + replacement.length
+    );
+    applyEditorEdit(lineStart, lineEnd, replacement, caret, caret);
+    return;
+  }
+
+  applyEditorEdit(lineStart, lineEnd, replacement, lineStart, lineStart + replacement.length);
 }
 
 function handleToolbarAction(action) {
@@ -662,7 +737,9 @@ function handleToolbarAction(action) {
     case "task":
       return prefixSelectedLines(() => "- [ ] ");
     case "code-block":
-      return insertAtSelection("```txt\n代码内容\n```\n", 7, 4);
+      // 选中"代码内容"这四个字，不要把后面的换行也框进去，
+      // 否则一打字闭合的 ``` 会被并到代码同一行，产出坏 Markdown。
+      return insertAtSelection("```txt\n代码内容\n```\n", 7, 5);
     case "hr":
       return insertAtSelection("\n---\n");
     default:
@@ -720,9 +797,22 @@ function snapshotFromPost(post) {
   };
 }
 
+// <select> 收到不在选项列表里的值会被吞掉（回落到默认项），
+// 于是 _posts 里 lang: en 这类写法一打开就变成 zh-Hans，
+// 保存时把文章语言静默改掉，而脏检查还认为"没有改动"。
+// 遇到未知语言就临时补一个选项，让它能原样存回去。
+function setLangValue(value) {
+  const next = value || "zh-Hans";
+  langInput.value = next;
+  if (langInput.value !== next) {
+    langInput.add(new Option(next + "（文件中的原值）", next));
+    langInput.value = next;
+  }
+}
+
 function applySnapshot(snapshot) {
   titleInput.value = snapshot.title || "";
-  langInput.value = snapshot.lang || "zh-Hans";
+  setLangValue(snapshot.lang);
   publishInput.value = snapshot.publishAt || defaultDateTimeLocal();
   slugInput.value = safeSlug(snapshot.slug || "");
   excerptInput.value = snapshot.excerpt || "";
@@ -822,14 +912,62 @@ function clearCurrentDraft() {
   clearDraftByKey(currentDraftKey());
 }
 
+// 预览渲染和草稿落盘都不便宜（整块 innerHTML 重建 + JSON 序列化 + localStorage 写入），
+// 逐字符同步执行会让长文打字明显发涩，这里统一做防抖。
+let previewTimer = 0;
+let draftTimer = 0;
+
+function schedulePreview() {
+  window.clearTimeout(previewTimer);
+  previewTimer = window.setTimeout(() => {
+    previewTimer = 0;
+    renderPreview();
+  }, 120);
+}
+
+function schedulePersistDraft() {
+  window.clearTimeout(draftTimer);
+  draftTimer = window.setTimeout(() => {
+    draftTimer = 0;
+    persistDraft();
+  }, 500);
+}
+
+// 保存/关闭/切换文章前必须把挂起的草稿写完，否则最后几百毫秒的输入会丢。
+function flushPendingWork() {
+  const hadPending = previewTimer || draftTimer;
+  window.clearTimeout(previewTimer);
+  window.clearTimeout(draftTimer);
+  previewTimer = 0;
+  draftTimer = 0;
+  if (hadPending) {
+    renderPreview();
+    // renderPreview 只会再排一次防抖，这里直接同步落盘。
+    window.clearTimeout(draftTimer);
+    draftTimer = 0;
+    persistDraft();
+  }
+}
+
 function persistDraft() {
   if (!state.uiReady || !("localStorage" in window)) {
     return;
   }
 
-  const snapshot = captureEditorSnapshot();
+  // 密码不进 localStorage：草稿是明文存的，把访问密码一起写进去等于白加密。
+  const { password, ...snapshot } = captureEditorSnapshot();
   const store = readDraftStore();
   const key = currentDraftKey();
+
+  // 和已保存的基线一致时就不该留草稿，否则保存后 renderPreview 会立刻把
+  // clearCurrentDraft 刚删掉的草稿重新写回来，下次打开必然误报"恢复草稿"。
+  if (state.dirtyBaseline && JSON.stringify(captureEditorSnapshot()) === state.dirtyBaseline) {
+    if (key in store) {
+      delete store[key];
+      writeDraftStore(store);
+    }
+    return;
+  }
 
   if (!hasSnapshotContent(snapshot)) {
     if (key in store) {
@@ -900,23 +1038,17 @@ function initializeLibraryState() {
 function renderComposerMode() {
   const editing = state.mode === "edit";
   composerModeChip.textContent = editing ? "编辑模式" : "新建模式";
-  if (editingFileEl) {
-    editingFileEl.hidden = !editing;
-    if (editing) {
-      editingFileEl.textContent = "当前文件：" + state.originalFileName;
-    }
+  composerModeChip.classList.toggle("editing", editing);
+
+  // 标题一直写着"新建文章"会让人分不清自己是在写新的还是在改旧的
+  if (composerHeading) {
+    composerHeading.textContent = editing ? "编辑文章" : "新建文章";
   }
 
   slugInput.disabled = editing;
   slugHelp.textContent = editing
     ? "编辑模式会保留原文件名与图片目录；slug 仅作为当前文件标识显示。"
     : "建议使用英文、数字和连字符。留空时会自动生成安全 slug。";
-  if (saveButton) {
-    saveButton.textContent = editing ? "保存修改" : "保存文章";
-  }
-  if (saveAndNewButton) {
-    saveAndNewButton.textContent = editing ? "保存并新建文章" : "保存并继续写下一篇";
-  }
 }
 
 function renderPostList() {
@@ -957,7 +1089,7 @@ function renderPostList() {
       "<button class=\"post-library-item" + (state.mode === "edit" && state.originalFileName === post.fileName ? " active" : "") + "\" type=\"button\" data-open-post=\"" + escapeHtml(post.fileName) + "\">" +
         "<span class=\"post-library-item-title\">" + escapeHtml(post.title) + "</span>" +
         "<span class=\"post-library-item-meta\">" + escapeHtml(formatListDate(post)) + "</span>" +
-        "<span class=\"post-library-local-status" + (hiddenLocally ? " is-hidden" : "") + "\">" + (hiddenLocally ? "已隐藏" : "可见") + "</span>" +
+        "<span class=\"post-library-local-status" + (hiddenLocally ? " is-hidden" : "") + "\">" + (hiddenLocally ? "线上已下架" : "线上可见") + "</span>" +
         (post.tags.length
           ? "<span class=\"post-library-item-tags\">" + post.tags.map((tag) => (
             "<span class=\"tag-pill suggestion\">" + escapeHtml(tag) + "</span>"
@@ -965,7 +1097,7 @@ function renderPostList() {
           : "") +
       "</button>" +
       "<div class=\"post-library-actions\" role=\"group\" aria-label=\"文章操作\">" +
-      "<button class=\"post-library-visibility-btn\" type=\"button\" data-toggle-post-visibility=\"" + escapeHtml(post.fileName) + "\" data-hidden=\"" + (hiddenLocally ? "true" : "false") + "\" title=\"" + (hiddenLocally ? "恢复并发布可见" : "隐藏并发布到网站") + "\" aria-label=\"" + (hiddenLocally ? "恢复并发布可见" : "隐藏并发布到网站") + "\">" +
+      "<button class=\"post-library-visibility-btn\" type=\"button\" data-toggle-post-visibility=\"" + escapeHtml(post.fileName) + "\" data-hidden=\"" + (hiddenLocally ? "true" : "false") + "\" title=\"" + (hiddenLocally ? "恢复到线上（会 commit 并 push）" : "从线上下架（会 commit 并 push）") + "\" aria-label=\"" + (hiddenLocally ? "恢复到线上（会 commit 并 push）" : "从线上下架（会 commit 并 push）") + "\">" +
         (hiddenLocally
           ? "<svg viewBox=\"0 0 24 24\" width=\"15\" height=\"15\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M12 5c5 0 9 5.5 9 7s-4 7-9 7-9-5.5-9-7 4-7 9-7zm0 2c-3.5 0-6.5 3.6-7 5 .5 1.4 3.5 5 7 5s6.5-3.6 7-5c-.5-1.4-3.5-5-7-5zm0 2.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5z\"/></svg>"
           : "<svg viewBox=\"0 0 24 24\" width=\"15\" height=\"15\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M2.3 4.7 3.7 3.3l17 17-1.4 1.4-3.1-3.1A10 10 0 0 1 12 19c-5 0-9-5.5-9-7 0-.8 1.1-2.6 2.8-4.2L2.3 4.7zM7.2 9.2C6 10.2 5.2 11.4 5 12c.5 1.4 3.5 5 7 5 .9 0 1.8-.2 2.6-.6l-2-2A2.5 2.5 0 0 1 9.6 11.4L7.2 9.2zM12 5c5 0 9 5.5 9 7 0 .8-.9 2.3-2.4 3.8l-2.1-2.1c.2-.5.4-1.1.4-1.7A4.8 4.8 0 0 0 12 7.1c-.6 0-1.2.1-1.7.3L8.6 5.7c1-.4 2.2-.7 3.4-.7z\"/></svg>") +
@@ -988,30 +1120,32 @@ function renderPreview() {
 
   if (!title && !body) {
     if (fileNameEl) {
-      fileNameEl.textContent = state.mode === "edit" && state.originalFileName ? state.originalFileName : "未生成文件名";
-    }
-    if (outputMetaEl) {
-      outputMetaEl.textContent = "语言与发布时间会显示在这里";
+      fileNameEl.textContent = state.mode === "edit" && state.originalFileName
+        ? state.originalFileName
+        : "填了标题后这里会显示文件名";
     }
     previewDate.textContent = "POST";
     previewTitle.textContent = "在左边输入标题和正文";
     previewHost.innerHTML = "<p class=\"preview-empty\">这里会渲染接近博客文章页的预览，包括标题、段落、列表、代码块和图片。</p>";
+    state.lastRenderedBody = "";
     renderPreviewTags();
-    persistDraft();
+    schedulePersistDraft();
     return;
   }
 
   if (fileNameEl) {
-    fileNameEl.textContent = buildFileName();
-  }
-  if (outputMetaEl) {
-    outputMetaEl.textContent = (state.mode === "edit" ? "模式：编辑 | " : "模式：新建 | ") + "语言：" + langInput.value + " | 标签：" + state.selectedTags.length + " | 摘要：" + (buildExcerpt() || "自动留空");
+    // 中文标题推不出 slug，保存时才会自动补一个，这里如实说明而不是提前写死。
+    fileNameEl.textContent = buildFileName() || "保存时会自动生成文件名（可在「文章设置」自定 slug）";
   }
   previewDate.textContent = formatPreviewDate(publishInput.value, langInput.value);
   previewTitle.textContent = title || "Untitled Post";
-  previewHost.innerHTML = body ? renderMarkdown(body) : "<p class=\"preview-empty\">正文为空。</p>";
+  // 只改标题/时间/标签时正文没变，没必要重跑 Markdown 再整块重建 DOM
+  if (body !== state.lastRenderedBody) {
+    previewHost.innerHTML = body ? renderMarkdown(body) : "<p class=\"preview-empty\">正文为空。</p>";
+    state.lastRenderedBody = body;
+  }
   renderPreviewTags();
-  persistDraft();
+  schedulePersistDraft();
 }
 
 function confirmDiscardChanges(message) {
@@ -1028,6 +1162,8 @@ function enterCreateMode(options = {}) {
   state.currentFileName = "";
   state.originalFileName = "";
   state.originalAssetSlug = "";
+  state.originalPublished = undefined;
+  state.originalEncrypted = false;
   setPublishAvailability(null);
   applySnapshot(snapshot);
   renderComposerMode();
@@ -1097,8 +1233,15 @@ async function openPostForEditing(fileName, options = {}) {
     state.currentFileName = normalizedFileName;
     state.originalFileName = normalizedFileName;
     state.originalAssetSlug = parsed.assetSlug;
+    state.originalPublished = parsed.published;
+    state.originalEncrypted = parsed.encrypted;
     setPublishAvailability(null);
     applySnapshot(draftSnapshot || baseSnapshot);
+    // 密码永远取自本次解密，不能让草稿里的空值把它盖掉——
+    // 否则保存时 buildMarkdown 走不加密分支，正文会以明文写回 _posts。
+    if (passwordInput) {
+      passwordInput.value = postPassword;
+    }
     slugInput.value = parsed.assetSlug;
     tagsInput.value = draftSnapshot ? draftSnapshot.pendingTagInput : "";
     renderComposerMode();
@@ -1108,21 +1251,22 @@ async function openPostForEditing(fileName, options = {}) {
     setComposerUrl(normalizedFileName);
     setDirtyBaseline(baseSnapshot);
     bodyInput.focus();
+    // 有没有草稿和"这篇是不是还有东西没发出去"是两回事，每次打开都该探一下
     let hasPublishableChanges = false;
-    if (!draftSnapshot) {
-      const publishContext = {
-        fileName: normalizedFileName,
-        assetSlug: parsed.assetSlug,
-        mode: "edit"
-      };
-      try {
-        const previewRequest = await postJson("/publish/preview", publishContext);
-        hasPublishableChanges = previewRequest.response.ok && previewRequest.result.status === "ready";
-        setPublishAvailability(hasPublishableChanges ? publishContext : null);
-      } catch (error) {
-        setPublishAvailability(null);
-      }
+    const publishContext = {
+      fileName: normalizedFileName,
+      assetSlug: parsed.assetSlug,
+      mode: "edit"
+    };
+    try {
+      const previewRequest = await postJson("/publish/preview", publishContext);
+      const previewStatus = previewRequest.response.ok ? previewRequest.result.status : "";
+      hasPublishableChanges = previewStatus === "ready" || previewStatus === "ahead";
+      setPublishAvailability(hasPublishableChanges ? publishContext : null);
+    } catch (error) {
+      setPublishAvailability(null);
     }
+
     setStatus(draftSnapshot
       ? "已打开 " + normalizedFileName + "，并恢复了这篇文章的未保存草稿。"
       : hasPublishableChanges
@@ -1331,7 +1475,15 @@ function fileToBase64(file) {
 
 function insertImagesMarkdown(entries) {
   const lines = entries.map((entry) => "![" + entry.alt + "](" + entry.webPath + ")");
-  insertAtSelection("\n" + lines.join("\n\n") + "\n");
+  const snippet = "\n" + lines.join("\n\n") + "\n";
+
+  // 单张图且没有有意义的 alt 时，把光标停在 ![] 中间，方便顺手补一句说明
+  if (entries.length === 1 && !entries[0].alt) {
+    insertAtSelection(snippet, 3, snippet.length - 3);
+    return;
+  }
+
+  insertAtSelection(snippet);
 }
 
 function handleLocalImageInsert() {
@@ -1362,7 +1514,10 @@ async function importImages(files) {
   }
 
   if (!titleInput.value.trim()) {
-    setStatus("插图前先填标题，这样图片会落到更合理的文章目录里。", "warn");
+    // 图片目录由 slug 决定，而 slug 来自标题，所以必须先有标题。
+    // 直接把光标送过去，省得用户自己找。
+    setStatus("图片会存到以标题命名的目录下，请先填标题（已把光标移到标题栏）。", "warn");
+    titleInput.focus();
     return;
   }
 
@@ -1371,31 +1526,66 @@ async function importImages(files) {
     return;
   }
 
+  // 加密只作用于正文，图片文件本身是以明文提交到公开仓库的。
+  if (passwordInput && passwordInput.value.trim()) {
+    if (!window.confirm("这篇文章设了访问密码，但插入的图片会以明文文件提交到公开仓库的 assets/posts/ 下，知道地址的人可以直接打开。\n\n仍然要插入吗？")) {
+      setStatus("已取消插图。", "");
+      return;
+    }
+  }
+
   try {
     setPublishAvailability(null);
-    if (state.mode === "create" && !state.slugTouched) {
-      slugInput.value = getCurrentSlug();
-      state.slugTouched = true;
+    // 图片目录必须落在一个确定的 slug 下，这里把它定下来。
+    const assetSlug = ensureSlug();
+    if (state.mode === "create") {
+      setStatus("图片会存到 assets/posts/" + assetSlug + "/，这篇文章的网址也就定为该 slug 了。要改请去「文章设置」。", "warn");
     }
     const inserted = [];
+    const failed = [];
 
-    for (const file of files) {
-      const request = await postJson("/api/images/import", {
-        assetSlug: getCurrentSlug(),
-        fileName: sanitizeImageName(file.name),
-        base64: await fileToBase64(file)
-      });
-      if (!request.response.ok || !request.result.ok) {
-        throw new Error(request.result.message || "图片保存失败。");
+    // 逐张处理并各自捕获异常：以前任何一张失败都会抛出去，
+    // 已经上传成功的几张既不插入正文也不告诉用户，等于白传。
+    for (let index = 0; index < files.length; index += 1) {
+      const file = files[index];
+      if (files.length > 1) {
+        setStatus("正在上传第 " + (index + 1) + " / " + files.length + " 张：" + file.name, "");
       }
-      inserted.push({
-        alt: safeFileStem(request.result.fileName.replace(/\.[^.]+$/, "")).replace(/-/g, " "),
-        webPath: request.result.webPath
-      });
+
+      try {
+        const request = await postJson("/api/images/import", {
+          assetSlug,
+          fileName: sanitizeImageName(file.name),
+          base64: await fileToBase64(file)
+        });
+        if (!request.response.ok || !request.result.ok) {
+          throw new Error(request.result.message || "图片保存失败。");
+        }
+
+        const stem = request.result.fileName.replace(/\.[^.]+$/, "");
+        // 粘贴/拖拽生成的名字是 paste-20260726190941 这种时间戳，
+        // 拿它当 alt 只是噪音，不如留空让作者自己补。
+        const isGeneratedName = /^(?:paste|drop)-\d{8,}(?:-\d+)?$/.test(stem);
+        inserted.push({
+          alt: isGeneratedName ? "" : safeFileStem(stem).replace(/-/g, " "),
+          webPath: request.result.webPath
+        });
+      } catch (error) {
+        failed.push(file.name + "（" + error.message + "）");
+      }
     }
 
-    insertImagesMarkdown(inserted);
-    setStatus("已导入 " + inserted.length + " 张图片，并自动插入正文。", "success");
+    if (inserted.length) {
+      insertImagesMarkdown(inserted);
+    }
+
+    if (failed.length && inserted.length) {
+      setStatus("已插入 " + inserted.length + " 张，另有 " + failed.length + " 张失败：" + failed.join("；"), "warn");
+    } else if (failed.length) {
+      setStatus("图片导入失败：" + failed.join("；"), "error");
+    } else {
+      setStatus("已导入 " + inserted.length + " 张图片，并自动插入正文。", "success");
+    }
   } catch (error) {
     setStatus("导入图片失败：" + error.message, "error");
   } finally {
@@ -1404,11 +1594,6 @@ async function importImages(files) {
 }
 
 async function saveToPosts(resetAfterSave) {
-  const publishContext = {
-    fileName: buildFileName(),
-    assetSlug: getCurrentSlug(),
-    mode: state.mode
-  };
   collectPendingTags();
   const title = titleInput.value.trim();
   const body = bodyInput.value.trim();
@@ -1418,8 +1603,32 @@ async function saveToPosts(resetAfterSave) {
     return false;
   }
 
+  // 这篇原本是加密的，密码却空了 —— 直接保存会把正文以明文写回 _posts，
+  // 再一键推送就等于把加密内容公开了。
+  if (state.originalEncrypted && passwordInput && !passwordInput.value.trim()) {
+    if (!window.confirm("这篇文章原本设了访问密码。密码框现在是空的，保存会把正文以明文写回并可推送到公开仓库。\n\n确定要取消加密吗？")) {
+      setStatus("已取消保存。请在「文章设置」里重新填入访问密码。", "warn");
+      return false;
+    }
+  }
+
+  // slug 到这一步才落定：中文标题推不出 slug 时在这里补，而不是在输入过程中写死。
+  ensureSlug();
+  const publishContext = {
+    fileName: buildFileName(),
+    assetSlug: getCurrentSlug(),
+    mode: state.mode
+  };
+
   if (state.mode === "edit" && !isDirty()) {
-    setStatus("当前文章没有新的改动。", "");
+    // 内容没变不代表没东西可发：上次可能保存成功但 push 失败。
+    // 给出发布上下文让 publishPost 去问服务端，而不是在这里断死。
+    setPublishAvailability({
+      fileName: state.originalFileName,
+      assetSlug: state.originalAssetSlug,
+      mode: "edit"
+    });
+    setStatus("内容没有改动，正在检查是否还有未推送的改动……", "");
     return true;
   }
 
@@ -1430,9 +1639,15 @@ async function saveToPosts(resetAfterSave) {
 
   try {
     const fileName = buildFileName();
+    // 把这一刻的内容固化下来：请求是异步的，期间用户还能继续打字。
+    // 之前 baseline 是在 await 之后才采样的，于是保存期间敲进去的字
+    // 会被当成"已经存过了"，实际并没有写进文件。
+    const savedSnapshot = captureEditorSnapshot();
+    const savedMarkdown = buildMarkdown();
+
     let saveRequest = await postJson("/api/posts/save", {
       fileName,
-      markdown: buildMarkdown(),
+      markdown: savedMarkdown,
       mode: state.mode,
       overwrite: false
     });
@@ -1443,7 +1658,7 @@ async function saveToPosts(resetAfterSave) {
       }
       saveRequest = await postJson("/api/posts/save", {
         fileName,
-        markdown: buildMarkdown(),
+        markdown: savedMarkdown,
         mode: state.mode,
         overwrite: true
       });
@@ -1468,13 +1683,20 @@ async function saveToPosts(resetAfterSave) {
       renderComposerMode();
       setComposerUrl(fileName);
     }
-    setDirtyBaseline(captureEditorSnapshot());
+    // 基线是"写进文件的那一份"，不是当前 DOM
+    setDirtyBaseline(savedSnapshot);
     setPublishAvailability(publishContext);
     renderPostList();
     renderPreview();
-    setStatus(publishContext.mode === "edit"
-      ? "已保存修改到 " + fileName + "。"
-      : "已保存到 " + fileName + "。刷新博客后就能看到新文章。", "success");
+
+    const changedDuringSave = JSON.stringify(captureEditorSnapshot()) !== JSON.stringify(savedSnapshot);
+    if (changedDuringSave) {
+      setStatus("已保存 " + fileName + "，但保存过程中你又改了内容，这部分还没写进文件——再存一次。", "warn");
+    } else {
+      setStatus(publishContext.mode === "edit"
+        ? "已保存修改到 " + fileName + "。"
+        : "已保存到 " + fileName + "。刷新博客后就能看到新文章。", "success");
+    }
     return true;
   } catch (error) {
     setStatus("保存失败：" + error.message, "error");
@@ -1541,6 +1763,22 @@ async function publishPost() {
       setStatus(preview.message || "当前文章没有可发布的 Git 改动。", "");
       return;
     }
+    if (preview.status === "ahead") {
+      // 这篇没有新改动，但本地攒着没推上去的提交（多半是上次 push 失败）
+      setPublishingState(false);
+      if (!window.confirm("这篇文章没有新的改动，但本地还有 " + preview.aheadCount + " 个提交没有推送到 " + (preview.upstream || "远端") + "。\n\n现在补推吗？")) {
+        setStatus("已取消推送。", "");
+        return;
+      }
+      setPublishingState(true, "正在推送...");
+      const aheadRequest = await postJson("/publish", state.lastSavedContext);
+      const aheadResult = aheadRequest.result;
+      setStatus(
+        aheadResult.message || (aheadRequest.response.ok && aheadResult.ok ? "已补推。" : "补推失败。"),
+        aheadRequest.response.ok && aheadResult.ok ? "success" : "error"
+      );
+      return;
+    }
     setPublishingState(false);
     if (!window.confirm(publishConfirmationMessage(preview))) {
       setStatus("已取消发布，文章仍保存在本地。", "");
@@ -1590,16 +1828,241 @@ toolbarButtons.forEach((button) => {
   button.addEventListener("click", () => handleToolbarAction(button.dataset.action));
 });
 
-newPostButton.addEventListener("click", switchToNewPost);
-if (saveButton) saveButton.addEventListener("click", () => saveToPosts(false));
-if (saveAndNewButton) saveAndNewButton.addEventListener("click", () => saveToPosts(true));
-if (publishButton) publishButton.addEventListener("click", publishPost);
-if (downloadButton) downloadButton.addEventListener("click", downloadMarkdown);
+/* ---------- 编辑器手感：快捷键、缩进、列表续行、粘贴与拖拽插图 ---------- */
 
-const savePublishButton = document.querySelector("#save-publish-post");
+const editorContainer = document.querySelector(".editor-container");
+
+// 行首标记：任务列表、无序列表、有序列表、引用
+const LIST_ITEM_PATTERN = /^([ \t]*)((?:[-*+] \[[ xX]\] )|(?:[-*+] )|(?:\d+\. )|(?:> ))(.*)$/;
+
+function nextListMarker(marker) {
+  const ordered = /^(\d+)\. $/.exec(marker);
+  if (ordered) {
+    return (Number(ordered[1]) + 1) + ". ";
+  }
+  // 续行的任务项永远是未勾选的
+  return marker.replace(/\[[xX]\]/, "[ ]");
+}
+
+// 回车时自动接上同样的列表/引用标记；在空列表项上回车则退出列表。
+function handleListContinuation(event) {
+  const value = bodyInput.value;
+  const caret = bodyInput.selectionStart;
+  if (bodyInput.selectionEnd !== caret) {
+    return false;
+  }
+
+  const lineStart = value.lastIndexOf("\n", caret - 1) + 1;
+  const lineEndIndex = value.indexOf("\n", caret);
+  const lineEnd = lineEndIndex === -1 ? value.length : lineEndIndex;
+  const match = LIST_ITEM_PATTERN.exec(value.slice(lineStart, lineEnd));
+  if (!match) {
+    return false;
+  }
+
+  const [, indent, marker, content] = match;
+  // 光标还在标记内部时不接管，交给浏览器默认行为
+  if (caret < lineStart + indent.length + marker.length) {
+    return false;
+  }
+
+  event.preventDefault();
+  if (!content.trim()) {
+    // 空条目上回车 = 结束列表，把这一行清空
+    applyEditorEdit(lineStart, lineEnd, "", lineStart, lineStart);
+    return true;
+  }
+
+  const insertion = "\n" + indent + nextListMarker(marker);
+  applyEditorEdit(caret, caret, insertion, caret + insertion.length, caret + insertion.length);
+  return true;
+}
+
+// Tab / Shift+Tab：单光标插入两个空格，多行选区整体缩进或反缩进。
+function handleIndent(event) {
+  const value = bodyInput.value;
+  const start = bodyInput.selectionStart;
+  const end = bodyInput.selectionEnd;
+  const outdent = event.shiftKey;
+
+  if (!outdent && !value.slice(start, end).includes("\n")) {
+    applyEditorEdit(start, end, "  ", start + 2, start + 2);
+    return;
+  }
+
+  const lineStart = value.lastIndexOf("\n", start - 1) + 1;
+  const lineEndIndex = value.indexOf("\n", end);
+  const lineEnd = lineEndIndex === -1 ? value.length : lineEndIndex;
+  const replacement = value
+    .slice(lineStart, lineEnd)
+    .split("\n")
+    .map((line) => (outdent ? line.replace(/^(?: {1,2}|\t)/, "") : "  " + line))
+    .join("\n");
+
+  applyEditorEdit(lineStart, lineEnd, replacement, lineStart, lineStart + replacement.length);
+}
+
+bodyInput.addEventListener("keydown", (event) => {
+  // 中文输入法组字过程中不要拦截任何键
+  if (event.isComposing || event.keyCode === 229) {
+    return;
+  }
+
+  if (event.ctrlKey || event.metaKey) {
+    const shortcut = { b: "bold", i: "italic", k: "link" }[event.key.toLowerCase()];
+    if (shortcut && !event.altKey && !event.shiftKey) {
+      event.preventDefault();
+      handleToolbarAction(shortcut);
+    }
+    return;
+  }
+
+  if (event.key === "Tab") {
+    event.preventDefault();
+    handleIndent(event);
+    return;
+  }
+
+  // Esc 移开焦点，这样 Tab 仍然可以用来在界面里跳转
+  if (event.key === "Escape") {
+    bodyInput.blur();
+    return;
+  }
+
+  if (event.key === "Enter" && !event.shiftKey && !event.altKey) {
+    handleListContinuation(event);
+  }
+});
+
+function imageFilesFrom(dataTransfer) {
+  return Array.from(dataTransfer && dataTransfer.files ? dataTransfer.files : [])
+    .filter((file) => file.type.startsWith("image/"));
+}
+
+// 剪贴板里的截图统一叫 image.png，这里换成带时间戳的名字，避免一篇文章里全是 image-2/3/4。
+function withTimestampedName(file, prefix) {
+  const extension = (file.type.split("/")[1] || "png").replace(/[^a-z0-9]/g, "") || "png";
+  const now = new Date();
+  const stamp = [
+    now.getFullYear(),
+    pad(now.getMonth() + 1),
+    pad(now.getDate()),
+    pad(now.getHours()),
+    pad(now.getMinutes()),
+    pad(now.getSeconds())
+  ].join("");
+  try {
+    return new File([file], prefix + "-" + stamp + "." + extension, { type: file.type });
+  } catch (error) {
+    return file;
+  }
+}
+
+bodyInput.addEventListener("paste", (event) => {
+  const clipboard = event.clipboardData;
+  if (!clipboard) {
+    return;
+  }
+
+  const images = imageFilesFrom(clipboard);
+  if (images.length) {
+    event.preventDefault();
+    importImages(images.map((file) => withTimestampedName(file, "paste")));
+    return;
+  }
+
+  // 选中一段文字后粘贴链接，直接组成 Markdown 链接
+  const text = clipboard.getData("text/plain").trim();
+  const hasSelection = bodyInput.selectionStart !== bodyInput.selectionEnd;
+  if (hasSelection && /^https?:\/\/\S+$/.test(text) && !/\s/.test(text)) {
+    event.preventDefault();
+    wrapSelection("[", "](" + text + ")", "链接文字");
+    setStatus("已把选中文字变成指向该链接的 Markdown 链接。", "success");
+  }
+});
+
+["dragenter", "dragover"].forEach((type) => {
+  bodyInput.addEventListener(type, (event) => {
+    if (!imageFilesFrom(event.dataTransfer).length) {
+      return;
+    }
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "copy";
+    if (editorContainer) {
+      editorContainer.classList.add("is-drop-target");
+    }
+  });
+});
+
+["dragleave", "dragend"].forEach((type) => {
+  bodyInput.addEventListener(type, () => {
+    if (editorContainer) {
+      editorContainer.classList.remove("is-drop-target");
+    }
+  });
+});
+
+// 预览跟着正文滚：长文写到后半段时，右边不再停在开头
+const previewPanel = document.querySelector(".preview-panel");
+let syncingScroll = false;
+
+function linkScroll(source, targetEl) {
+  source.addEventListener("scroll", () => {
+    if (syncingScroll || !targetEl) {
+      return;
+    }
+    const sourceRange = source.scrollHeight - source.clientHeight;
+    const targetRange = targetEl.scrollHeight - targetEl.clientHeight;
+    if (sourceRange <= 0 || targetRange <= 0) {
+      return;
+    }
+    syncingScroll = true;
+    targetEl.scrollTop = (source.scrollTop / sourceRange) * targetRange;
+    // 用 rAF 解锁，避免两边互相触发形成回环
+    requestAnimationFrame(() => {
+      syncingScroll = false;
+    });
+  });
+}
+
+if (previewPanel) {
+  linkScroll(bodyInput, previewPanel);
+  linkScroll(previewPanel, bodyInput);
+}
+
+bodyInput.addEventListener("drop", (event) => {
+  if (editorContainer) {
+    editorContainer.classList.remove("is-drop-target");
+  }
+  const images = imageFilesFrom(event.dataTransfer);
+  if (!images.length) {
+    return;
+  }
+  event.preventDefault();
+  importImages(images.map((file) => withTimestampedName(file, "drop")));
+});
+
+newPostButton.addEventListener("click", switchToNewPost);
+if (downloadButton) {
+  downloadButton.addEventListener("click", downloadMarkdown);
+}
+
 if (savePublishButton) {
   savePublishButton.addEventListener("click", async () => {
-    const saved = await saveToPosts(false);
+    if (state.publishing) {
+      return;
+    }
+    // 先把防抖里挂着的草稿写完，避免最后一两个字没进快照
+    flushPendingWork();
+
+    setBusyState(true, "正在保存...");
+    let saved = false;
+    try {
+      saved = await saveToPosts(false);
+    } finally {
+      setBusyState(false);
+    }
+
     if (saved) {
       await publishPost();
     }
@@ -1629,27 +2092,26 @@ selectedTagsEl.addEventListener("click", (event) => {
   toggleTag(button.dataset.toggleTag);
 });
 
-if (availableTagsEl) {
-  availableTagsEl.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-add-tag]");
-    if (!button) {
-      return;
-    }
-    addTag(button.dataset.addTag);
-  });
-}
-
 postListEl.addEventListener("click", async (event) => {
   const visibilityBtn = event.target.closest("[data-toggle-post-visibility]");
   if (visibilityBtn) {
-    await setPostLocalVisibility(visibilityBtn.dataset.togglePostVisibility, visibilityBtn.dataset.hidden !== "true");
+    const fileName = visibilityBtn.dataset.togglePostVisibility;
+    const willHide = visibilityBtn.dataset.hidden !== "true";
+    // 这个按钮紧挨着删除按钮，而且点下去会直接 commit + push 到线上，
+    // 和发布走同一条不可逆的路，必须先问一句。
+    const action = willHide ? "从线上下架" : "恢复到线上";
+    if (!window.confirm("确定把《" + fileName + "》" + action + "吗？\n\n这会改写文章的 published 标记，并立即 git commit + git push 到远端（当前分支其他待推送的提交也会一并上传）。")) {
+      return;
+    }
+    await setPostLocalVisibility(fileName, willHide);
     return;
   }
 
   const deleteBtn = event.target.closest("[data-delete-post]");
   if (deleteBtn) {
     const fileName = deleteBtn.dataset.deletePost;
-    if (confirm("确定要删除文章 \"" + fileName + "\" 吗？此操作无法撤销。")) {
+    // 说清楚删除到底做了什么：只删本地文件，不会 git rm，线上那篇还在
+    if (confirm("删除《" + fileName + "》？\n\n· 删除本地 _posts 文件和它的图片目录\n· 会在 tmp/post-backups/ 留一份备份\n· 不会自动 git rm，线上文章要等这次删除被提交推送后才消失")) {
       try {
         const response = await fetch("/api/posts/delete", {
           method: "POST",
@@ -1661,8 +2123,8 @@ postListEl.addEventListener("click", async (event) => {
         });
         const result = await response.json();
         if (result.ok) {
-          alert("成功删除文章 \"" + fileName + "\"");
-          setStatus("", "");
+          // 这篇的草稿也要清掉，否则会一直挂在 localStorage 里成为孤儿
+          clearDraftByKey(draftKeyFor(fileName));
           if (state.mode === "edit" && state.originalFileName === fileName) {
             state.dirtyBaseline = JSON.stringify(emptySnapshot());
             switchToNewPost();
@@ -1670,11 +2132,12 @@ postListEl.addEventListener("click", async (event) => {
           await loadPostsIndex();
           await loadLocalVisibility();
           renderPostList();
+          setStatus(result.message || ("已删除本地文件 " + fileName + "。"), "warn");
         } else {
-          alert(result.message || "删除文章失败。");
+          setStatus(result.message || "删除文章失败。", "error");
         }
       } catch (error) {
-        alert("删除失败：" + error.message);
+        setStatus("删除失败：" + error.message, "error");
       }
     }
     return;
@@ -1690,7 +2153,9 @@ postListEl.addEventListener("click", async (event) => {
 [titleInput, langInput, publishInput, excerptInput, bodyInput].forEach((element) => {
   element.addEventListener("input", () => {
     setPublishAvailability(null);
-    renderPreview();
+    // 字数统计很便宜，立刻更新；重的预览渲染和草稿写入交给防抖。
+    updateEditorStats();
+    schedulePreview();
   });
 });
 
@@ -1712,10 +2177,13 @@ window.addEventListener("keydown", (event) => {
   }
 
   event.preventDefault();
+  // 和"保存并发送"按钮保持一致：先把防抖里挂着的草稿写完再保存
+  flushPendingWork();
   saveToPosts(event.shiftKey);
 });
 
 window.addEventListener("beforeunload", (event) => {
+  flushPendingWork();
   if (!isDirty()) {
     return;
   }

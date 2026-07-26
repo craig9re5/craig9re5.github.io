@@ -8,6 +8,7 @@ import os
 import posixpath
 import re
 import secrets
+import shutil
 import signal
 import socket
 import subprocess
@@ -38,6 +39,9 @@ DEFAULT_RECORD_FILE = REPO_ROOT / "tmp" / "post-composer-server.json"
 SERVER_LOG_FILE = REPO_ROOT / "tmp" / "post-composer-server.log"
 SERVER_ERR_FILE = REPO_ROOT / "tmp" / "post-composer-server.err.log"
 LOCAL_VISIBILITY_FILE = REPO_ROOT / "tmp" / "local-post-visibility.json"
+# 覆盖保存和删除都是不可逆的整文件操作，先往这里留一份。tmp/ 已在 .gitignore 中。
+POST_BACKUP_DIR = REPO_ROOT / "tmp" / "post-backups"
+MAX_BACKUPS_PER_POST = 10
 
 
 def hidden_subprocess_kwargs() -> dict[str, object]:
@@ -53,17 +57,43 @@ def hidden_subprocess_kwargs() -> dict[str, object]:
     }
 
 
-def run_git(args: list[str], check: bool = True) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        ["git", *args],
-        cwd=REPO_ROOT,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        check=check,
-        **hidden_subprocess_kwargs(),
-    )
+def run_git(args: list[str], check: bool = True, timeout: int = 90) -> subprocess.CompletedProcess[str]:
+    # GIT_TERMINAL_PROMPT=0 + stdin 关掉：否则凭证过期时 git 会在后台进程里
+    # 等一个永远不会有人输入的用户名，整个发布就挂死在那儿。
+    env = dict(os.environ, GIT_TERMINAL_PROMPT="0", GIT_OPTIONAL_LOCKS="0")
+    try:
+        return subprocess.run(
+            ["git", *args],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=check,
+            timeout=timeout,
+            stdin=subprocess.DEVNULL,
+            env=env,
+            **hidden_subprocess_kwargs(),
+        )
+    except subprocess.TimeoutExpired as error:
+        raise RuntimeError(
+            f"git {' '.join(args[:2])} 超过 {timeout} 秒没有返回，已中止。"
+            "常见原因是网络不通或远端要求输入凭证。"
+        ) from error
+
+
+def explain_git_error(message: str) -> str:
+    """把 git 的英文报错翻成能照着做的中文提示。"""
+    lowered = message.lower()
+    if "rejected" in lowered and ("fetch first" in lowered or "non-fast-forward" in lowered):
+        return "远端有你本地还没有的提交。请先在仓库里跑 git pull --rebase，再回来重试发布。\n\n原始信息：" + message
+    if "could not read username" in lowered or "authentication failed" in lowered or "permission denied" in lowered:
+        return "推送时认证失败，凭证可能已过期。请在终端手动跑一次 git push 完成认证后再重试。\n\n原始信息：" + message
+    if "could not resolve host" in lowered or "failed to connect" in lowered or "timed out" in lowered:
+        return "连不上远端仓库，请检查网络后重试。\n\n原始信息：" + message
+    if "please tell me who you are" in lowered or "author identity unknown" in lowered:
+        return "git 还没配置提交身份。请先跑 git config user.name 和 git config user.email。\n\n原始信息：" + message
+    return message
 
 
 def status_url(port: int) -> str:
@@ -422,6 +452,28 @@ def update_local_visibility(payload: dict[str, object]) -> dict[str, object]:
     }
 
 
+def backup_post_file(target: Path) -> None:
+    """覆盖或删除前留一份副本，每篇最多保留最近 MAX_BACKUPS_PER_POST 份。"""
+    if not target.is_file():
+        return
+
+    try:
+        POST_BACKUP_DIR.mkdir(parents=True, exist_ok=True)
+        stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        shutil.copy2(target, POST_BACKUP_DIR / f"{target.name}.{stamp}.bak")
+
+        existing = sorted(
+            POST_BACKUP_DIR.glob(f"{target.name}.*.bak"),
+            key=lambda path: path.stat().st_mtime,
+            reverse=True,
+        )
+        for stale in existing[MAX_BACKUPS_PER_POST:]:
+            stale.unlink(missing_ok=True)
+    except OSError:
+        # 备份失败不该阻断保存本身，用户的正文更重要
+        pass
+
+
 def save_post(payload: dict[str, object]) -> dict[str, object]:
     file_name = normalize_post_file_name(str(payload.get("fileName", "")))
     markdown = payload.get("markdown")
@@ -443,6 +495,7 @@ def save_post(payload: dict[str, object]) -> dict[str, object]:
             "fileName": file_name,
         }
 
+    backup_post_file(target)
     target.write_text(markdown, encoding="utf-8", newline="\n")
     return {"ok": True, "status": "saved", "fileName": file_name}
 
@@ -454,12 +507,32 @@ def delete_post(payload: dict[str, object]) -> dict[str, object]:
     target = POSTS_DIR / file_name
     if not target.exists() or not target.is_file():
         raise FileNotFoundError(f"未找到文章文件 {file_name}。")
+    backup_post_file(target)
     target.unlink()
+
+    # 一并清掉这篇文章的图片目录，否则 assets/posts/<slug>/ 会永远留在仓库里
+    removed_assets = False
+    asset_slug = re.sub(r"^\d{4}-\d{2}-\d{2}-", "", file_name[:-3])
+    if VALID_SLUG_RE.fullmatch(asset_slug):
+        asset_dir = POST_ASSETS_DIR / asset_slug
+        if asset_dir.is_dir():
+            try:
+                shutil.move(str(asset_dir), str(POST_BACKUP_DIR / f"{asset_slug}-assets-{datetime.now().strftime('%Y%m%d-%H%M%S')}"))
+                removed_assets = True
+            except OSError:
+                pass
+
     hidden_posts = read_local_visibility()
     if file_name in hidden_posts:
         hidden_posts.discard(file_name)
         write_local_visibility(hidden_posts)
-    return {"ok": True, "message": f"成功删除文章 {file_name}。"}
+
+    # 说清楚：只动了本地文件，线上那篇还在，要等下一次 push 才会同步
+    message = f"已删除本地文件 {file_name}"
+    if removed_assets:
+        message += f"，并移走了图片目录 assets/posts/{asset_slug}/"
+    message += "。备份在 tmp/post-backups/。注意：线上文章要等这次删除被提交并推送后才会消失。"
+    return {"ok": True, "message": message, "backedUp": True}
 
 
 def sanitize_image_name(original_name: str) -> str:
@@ -523,10 +596,23 @@ def publish_preview(payload: dict[str, object]) -> dict[str, object]:
         if ahead_result.returncode == 0 and ahead_result.stdout.strip().isdigit():
             ahead_count = int(ahead_result.stdout.strip())
 
+    # 三态：ready 有未提交改动；ahead 没有改动但本地有提交还没推上去
+    # （上次 push 失败就会卡在这个状态，以前会被当成 noop 直接拒绝，再也发不出去）；
+    # noop 才是真的没事可做。
+    if changes:
+        status = "ready"
+        message = "已准备发布检查。"
+    elif ahead_count > 0:
+        status = "ahead"
+        message = f"这篇文章没有新的改动，但本地还有 {ahead_count} 个提交没有推送到远端。"
+    else:
+        status = "noop"
+        message = "当前文章没有可发布的 Git 改动。"
+
     return {
         "ok": True,
-        "status": "ready" if changes else "noop",
-        "message": "当前文章没有可发布的 Git 改动。" if not changes else "已准备发布检查。",
+        "status": status,
+        "message": message,
         "fileName": file_name,
         "assetSlug": asset_slug,
         "mode": mode,
@@ -551,6 +637,24 @@ def publish_post(payload: dict[str, object]) -> dict[str, object]:
             "paths": paths,
         }
 
+    # 这篇没有新改动，但本地攒了未推送的提交（多半是上次 push 失败）。
+    # 跳过 add/commit，直接补一次推送。
+    if preview["status"] == "ahead":
+        push_result = run_git(["push", "origin", "HEAD"], check=False)
+        if push_result.returncode != 0:
+            return {
+                "ok": False,
+                "status": "committed_not_pushed",
+                "message": "补推失败：" + explain_git_error((push_result.stderr or push_result.stdout or "git push failed").strip()),
+                "paths": paths,
+            }
+        return {
+            "ok": True,
+            "status": "published",
+            "message": f"已把本地 {preview['aheadCount']} 个待推送提交推到远端。",
+            "paths": paths,
+        }
+
     add_result = run_git(["add", "--", *paths], check=False)
     if add_result.returncode != 0:
         raise RuntimeError((add_result.stderr or add_result.stdout or "git add failed").strip())
@@ -568,14 +672,16 @@ def publish_post(payload: dict[str, object]) -> dict[str, object]:
     commit_message = build_commit_message(mode, file_name)
     commit_result = run_git(["commit", "--only", "-m", commit_message, "--", *paths], check=False)
     if commit_result.returncode != 0:
-        raise RuntimeError((commit_result.stderr or commit_result.stdout or "git commit failed").strip())
+        raise RuntimeError(explain_git_error((commit_result.stderr or commit_result.stdout or "git commit failed").strip()))
 
     push_result = run_git(["push", "origin", "HEAD"], check=False)
     if push_result.returncode != 0:
         return {
             "ok": False,
             "status": "committed_not_pushed",
-            "message": "文章已提交到本地，但推送失败：" + (push_result.stderr or push_result.stdout or "git push failed").strip(),
+            "message": "文章已提交到本地，但推送失败：\n"
+            + explain_git_error((push_result.stderr or push_result.stdout or "git push failed").strip())
+            + "\n\n改动没有丢，修好后再点一次「保存并发送」就会补推。",
             "commitMessage": commit_message,
             "paths": staged_files,
         }
@@ -746,7 +852,13 @@ class ComposerRequestHandler(SimpleHTTPRequestHandler):
     def end_headers(self) -> None:
         self.send_header(
             "Content-Security-Policy",
-            "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: http: https:; "
+            # style-src / font-src 放行 Google Fonts：post-composer.css 第一行 @import 的
+            # Outfit + Newsreader 是这套界面设计好的字体，在 'self' 下会被静默拦掉，
+            # 整个工具一直跑在 Segoe UI 兜底上。内联样式仍然不放行，HTML 里不要再写 style=""。
+            "default-src 'self'; script-src 'self'; "
+            "style-src 'self' https://fonts.googleapis.com; "
+            "font-src 'self' https://fonts.gstatic.com; "
+            "img-src 'self' data: http: https:; "
             "connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
         )
         self.send_header("X-Content-Type-Options", "nosniff")

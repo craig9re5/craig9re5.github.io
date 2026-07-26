@@ -306,6 +306,33 @@ select {
   padding: 28px 30px 30px;
 }
 
+/* 这两条原本写在 HTML 的 style="" 里，被服务端的 CSP（style-src 'self'）
+   静默拦掉，主题按钮一直不是圆的。搬到样式表里才会生效。 */
+.masthead-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 用 .masthead 提高特异度，否则后面的 .tool-button 会把圆角改回 8px */
+.masthead .theme-toggle-btn {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 0;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.masthead .theme-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
 .masthead-status .status-chip {
   background: rgba(255, 255, 255, 0.16);
   color: #f7fbfa;
@@ -576,7 +603,8 @@ h1 {
   top: 14px;
   right: 14px;
   display: inline-flex;
-  gap: 6px;
+  /* 下架和删除这两个不可逆操作挨得太近，6px 很容易点错 */
+  gap: 12px;
   opacity: 0;
   pointer-events: none;
   transform: translateY(-2px);
@@ -1401,6 +1429,359 @@ textarea {
 
 .hidden {
   display: none !important;
+}
+
+/* ============================================================
+   深色模式补漏：文章库这几处背景写死了白色，而 --accent-deep
+   在深色主题下会翻成近白（#ecf6f5），于是白底白字/白底白图标。
+   ============================================================ */
+[data-theme="dark"] .library-toggle,
+[data-theme="dark"] .library-search input,
+[data-theme="dark"] .post-library-visibility-btn,
+[data-theme="dark"] .post-library-delete-btn {
+  background: var(--item-bg);
+}
+
+[data-theme="dark"] .post-library-item.active {
+  background: rgba(63, 161, 149, 0.16);
+}
+
+[data-theme="dark"] .library-header {
+  background: var(--item-bg);
+}
+
+/* 让原生下拉框、日期选择器跟随主题，否则暗色下弹出的仍是浅色控件 */
+:root {
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+/* ============================================================
+   拖拽插图的落点提示
+   ============================================================ */
+.editor-container.is-drop-target {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(31, 107, 99, 0.14);
+}
+
+.editor-container.is-drop-target .editor-area {
+  background-color: rgba(31, 107, 99, 0.05);
+}
+
+/* 正在保存/发布时，主按钮要看得出来在忙 */
+.action-button.is-busy {
+  cursor: progress;
+  opacity: 0.75;
+}
+
+/* ============================================================
+   标题栏：标题输入框本身就是这张卡片的标题，不再额外占一行大标题
+   ============================================================ */
+.composer-titlebar {
+  align-items: center;
+  gap: 12px;
+}
+
+@media (min-width: 900px) {
+  .composer-titlebar {
+    flex-wrap: nowrap;
+  }
+}
+
+/* 不锁住的话它会被标题输入框挤扁，"新建模式"折成三行 */
+.composer-titlebar .composer-mode-row {
+  flex: 0 0 auto;
+}
+
+.composer-titlebar .status-chip {
+  white-space: nowrap;
+}
+
+.title-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 4px 0;
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.018em;
+  line-height: 1.3;
+}
+
+.title-input:focus {
+  outline: none;
+  box-shadow: none;
+  border-bottom: 2px solid var(--accent);
+}
+
+.title-input::placeholder {
+  font-weight: 600;
+  opacity: 0.45;
+}
+
+/* 标签收成一行：标签名 + 已选 chips + 输入框。
+   窄屏放不下三段，那里保持原来的上下堆叠。 */
+@media (min-width: 900px) {
+  .tag-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+  }
+
+  .tag-field .field-label {
+    flex: 0 0 auto;
+  }
+
+  /* 这里渲染的是全部标签（已选 + 可选），数量会随时间变多。
+     让它横向滚动而不是换行，标签行才能稳定只占一行高度。 */
+  .tag-field .tag-chip-list {
+    flex: 1 1 0;
+    min-width: 0;
+    margin: 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 2px;
+  }
+
+  .tag-field .tag-chip-list > * {
+    flex: 0 0 auto;
+  }
+
+  .tag-field .tag-input-row {
+    flex: 0 0 296px;
+  }
+}
+
+/* 底部动作栏兼作编辑器状态栏：左边字数与目标文件名，右边按钮 */
+.action-row {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.action-row .editor-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+/* 没有消息时不要白占一行 */
+.status-text:empty {
+  display: none;
+}
+
+/* 保存后会生成的文件名，写作时一直可见 */
+.editor-target-file {
+  font-family: var(--editor-font);
+  font-size: 0.86rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 58%;
+}
+
+.status-chip.editing {
+  background: rgba(240, 195, 106, 0.22);
+  color: #7a5410;
+}
+
+[data-theme="dark"] .status-chip.editing {
+  background: rgba(240, 195, 106, 0.16);
+  color: #f0c36a;
+}
+
+/* ============================================================
+   应用式布局（宽屏 + 够高时启用）
+
+   原先整个页面是普通文档流：正文 textarea 固定 620px 高，
+   于是 1366x768 下页面总高 1626px —— 写字要先往下滚，
+   "保存并发送"落在 y=1400 完全在屏幕外，右侧预览却只有 296px。
+   这里把它改成固定视口高度的应用外壳：外层不滚动，
+   正文和预览各自独立滚动，动作栏永远在视野里。
+   ============================================================ */
+@media (min-width: 1201px) and (min-height: 640px) {
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    overflow: hidden;
+  }
+
+  .shell {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px 18px 18px;
+  }
+
+  /* 顶栏在 768px 高的屏幕上原本要吃掉 135px，压扁它 */
+  .masthead {
+    flex: 0 0 auto;
+    margin-bottom: 0;
+  }
+
+  .masthead-inner {
+    padding: 14px 24px 16px;
+  }
+
+  .masthead h1 {
+    font-size: 1.3rem;
+    margin: 0;
+  }
+
+  .layout {
+    flex: 1 1 auto;
+    min-height: 0;
+    align-items: stretch;
+  }
+
+  /* 侧栏改为撑满列高、列表内部滚动 */
+  .library-panel {
+    position: static;
+    max-height: none;
+    height: 100%;
+    flex-direction: column;
+  }
+
+  .library-rail {
+    min-height: 0;
+    flex: 0 0 auto;
+  }
+
+  .layout.library-expanded .library-panel {
+    overflow: hidden;
+  }
+
+  .layout.library-expanded .library-content {
+    min-height: 0;
+  }
+
+  .post-library-list {
+    max-height: none;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .content-split {
+    min-height: 0;
+    align-items: stretch;
+  }
+
+  .composer-main {
+    min-height: 0;
+    display: flex;
+  }
+
+  .composer-workspace {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* 编辑卡片由 grid 改成纵向 flex，好让正文区吃掉剩余空间 */
+  .editor-card {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* 用子选择器提高特异度，否则会被下面的 .editor-card > * 覆盖成不可伸缩 */
+  .editor-card > .editor-container {
+    flex: 1 1 auto;
+    min-height: 160px;
+  }
+
+  .editor-area {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    resize: none;
+    overflow-y: auto;
+  }
+
+  /* flex 子项默认可收缩，不锁住的话 <details> 会被正文区压成 1px */
+  .editor-card > * {
+    flex: 0 0 auto;
+  }
+
+  .helper-drawer {
+    flex: 0 0 auto;
+  }
+
+  .editor-card .section-kicker {
+    display: none;
+  }
+
+  /* 竖向空间在这个模式下很贵，把非写作区的一切都压紧一档 */
+  .editor-card {
+    padding: 16px 18px;
+  }
+
+  .title-input {
+    font-size: 1.3rem;
+  }
+
+  .drawer-card summary {
+    padding: 10px 14px;
+  }
+
+  .toolbar-shell {
+    padding: 7px 12px;
+  }
+
+  /* 14 个按钮在 36px 时总宽 661px，超过编辑列的 550px 会折成两行，
+     直接吃掉一半正文高度。缩到 30px 正好排成一行。 */
+  .toolbar {
+    gap: 7px;
+    flex-wrap: nowrap;
+  }
+
+  .toolbar-group {
+    flex-wrap: nowrap;
+    gap: 5px;
+    padding-right: 7px;
+  }
+
+  /* 只缩 Markdown 工具栏里的按钮，别把顶栏的主题切换按钮一起缩了 */
+  .toolbar .tool-button {
+    width: 30px;
+    height: 30px;
+  }
+
+  .toolbar .tool-button svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  /* 预览撑满整列并独立滚动，不再是 296px 的一条 */
+  .preview-panel {
+    position: static;
+    max-height: none;
+    height: 100%;
+    overflow-y: auto;
+  }
 }
 
 @media (max-width: 1200px) {

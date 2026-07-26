@@ -14,8 +14,8 @@
             <p class="eyebrow">Local Composer</p>
             <h1>本地发帖器</h1>
           </div>
-          <div class="masthead-status" style="display: flex; align-items: center; gap: 12px;">
-            <button class="tool-button theme-toggle-btn" id="theme-toggle" type="button" title="切换深色/浅色模式" style="background: rgba(255, 255, 255, 0.12); color: #fff; border-radius: 50%; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border: 0; cursor: pointer; transition: background-color 0.2s ease;">
+          <div class="masthead-status">
+            <button class="tool-button theme-toggle-btn" id="theme-toggle" type="button" title="切换深色/浅色模式">
               <svg id="theme-toggle-icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
                 <path d="M12.3 22h-.1c-5.5 0-10-4.5-10-10 0-4.8 3.5-8.9 8.2-9.8.6-.1 1.2.3 1.3.9.1.6-.2 1.2-.8 1.4-2.8 1-4.7 3.5-4.7 6.5 0 3.9 3.1 7 7 7 3 0 5.5-1.9 6.5-4.7.2-.6.8-.9 1.4-.8.6.1 1 .7.9 1.3-.9 4.7-5 8.2-9.7 8.2z"/>
               </svg>
@@ -63,29 +63,20 @@
           <main class="composer-main">
           <section class="panel composer-workspace">
             <section class="editor-card stack">
-              <div class="section-heading">
-                <div>
-                  <p class="section-kicker">Write</p>
-                  <h2 class="section-title">新建文章</h2>
-                </div>
+              <div class="section-heading composer-titlebar">
+                <h2 class="section-title visually-hidden" id="composer-heading">新建文章</h2>
+                <input id="title" name="title" type="text" class="title-input" placeholder="文章标题" aria-label="文章标题" required>
                 <div class="composer-mode-row">
                   <div class="status-chip" id="composer-mode-chip">新建模式</div>
                 </div>
               </div>
 
-              <div class="grid">
-                <label>
-                  <span class="field-label">标题</span>
-                  <input id="title" name="title" type="text" placeholder="例如：我的猪猪堡呢？？" required>
-                </label>
-
-                <div class="field-group">
-                  <span class="field-label">标签</span>
-                  <div class="tag-chip-list" id="selected-tags" aria-live="polite"></div>
-                  <div class="tag-input-row" style="margin-top: 8px;">
-                    <input id="tags-input" name="tags" type="text" placeholder="创建新标签后按 Enter 或逗号">
-                    <button class="action-button secondary compact" id="add-tag" type="button">创建新标签</button>
-                  </div>
+              <div class="field-group tag-field">
+                <span class="field-label">标签</span>
+                <div class="tag-chip-list" id="selected-tags" aria-live="polite"></div>
+                <div class="tag-input-row">
+                  <input id="tags-input" name="tags" type="text" placeholder="输入标签后按 Enter 或逗号">
+                  <button class="action-button secondary compact" id="add-tag" type="button">创建新标签</button>
                 </div>
               </div>
 
@@ -111,14 +102,14 @@
 
                   <label>
                     <span class="field-label">摘要</span>
-                    <textarea id="excerpt" name="excerpt" rows="4" placeholder="首页和 Archive 用的摘要。留空时会自动从正文前面截一段。"></textarea>
+                    <textarea id="excerpt" name="excerpt" rows="3" placeholder="首页和 Archive 用的摘要。留空就是留空，不会自动生成。"></textarea>
                     <span class="field-help">单篇文章页不会重复显示这段摘要。</span>
                   </label>
 
                   <label>
                     <span class="field-label">文件 slug</span>
                     <input id="slug" name="slug" type="text" placeholder="默认自动生成">
-                    <span class="field-help" id="slug-help">建议使用英文、数字 and 连字符。留空时会自动生成安全 slug。</span>
+                    <span class="field-help" id="slug-help">建议使用英文、数字和连字符。留空时会自动生成安全 slug。</span>
                   </label>
 
                   <label>
@@ -172,7 +163,7 @@
                           <line x1="15" y1="4" x2="9" y2="20" />
                         </svg>
                       </button>
-                      <button class="tool-button" data-action="link" type="button" title="插入链接">
+                      <button class="tool-button" data-action="link" type="button" title="插入链接 (Ctrl+K)">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                           <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                           <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
@@ -235,7 +226,7 @@
                           <line x1="2" y1="12" x2="22" y2="12" stroke-width="2.5" />
                         </svg>
                       </button>
-                      <button class="tool-button" id="insert-local-image" type="button" title="本地导入图片">
+                      <button class="tool-button" id="insert-local-image" type="button" title="插入本地图片（也可以直接 Ctrl+V 粘贴截图或把图片拖进正文）">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                           <rect x="3" y="3" width="18" height="18" rx="2" />
                           <circle cx="8.5" cy="8.5" r="1.5" />
@@ -267,27 +258,31 @@
                 ></textarea>
               </div>
 
-              <div class="editor-meta">
-                <div id="editor-stats">0 字符 | 0 行</div>
-              </div>
-
               <div class="action-row">
-                <button class="action-button primary" id="save-publish-post" type="button">保存并发送</button>
+                <div class="editor-meta">
+                  <span id="editor-stats">0 字符 | 0 行</span>
+                  <span id="file-name" class="editor-target-file" title="保存后生成的文件名">填了标题后这里会显示文件名</span>
+                </div>
+                <div class="action-buttons">
+                  <button class="action-button ghost compact" id="download-post" type="button" title="把当前内容导出为 .md 备份">导出 .md</button>
+                  <button class="action-button primary" id="save-publish-post" type="button">保存并发送</button>
+                </div>
               </div>
 
               <p id="status" class="status-text"></p>
             </section>
 
             <details class="drawer-card helper-drawer">
-              <summary>Markdown 帮助</summary>
+              <summary>快捷键与 Markdown 帮助</summary>
               <div class="details-body">
                 <ul class="helper-list">
-                  <li><code>**粗体**</code>、<code>*斜体*</code>、<code>`行内代码`</code></li>
-                  <li><code># 一级标题</code>、<code>## 二级标题</code>、引用、列表、任务列表</li>
-                  <li><code>本地导入图片</code> 会直接保存到 <code>assets/posts/&lt;slug&gt;/</code> 再插入正文</li>
-                  <li><code>添加网络图片</code> 会直接插入 Markdown 外链模板，粘贴图片 URL 即可</li>
-                  <li>草稿会自动保存在浏览器本地；发布前会确认分支、待推送提交和当前文章文件</li>
-                  <li><code>Ctrl + S</code> / <code>Cmd + S</code> 直接保存，按住 <code>Shift</code> 会进入下一篇</li>
+                  <li><strong>插图</strong>：正文里直接 <code>Ctrl + V</code> 粘贴截图，或把图片文件拖进正文，都会自动存到 <code>assets/posts/&lt;slug&gt;/</code> 并插入</li>
+                  <li><strong>快捷键</strong>：<code>Ctrl + B</code> 粗体、<code>Ctrl + I</code> 斜体、<code>Ctrl + K</code> 链接、<code>Ctrl + S</code> 保存（按住 <code>Shift</code> 保存后直接开下一篇）</li>
+                  <li><strong>写列表</strong>：回车自动接上一条，在空条目上再按回车就退出列表；<code>Tab</code> / <code>Shift + Tab</code> 缩进和反缩进</li>
+                  <li>选中一段文字后粘贴网址，会自动变成 Markdown 链接</li>
+                  <li>工具栏按钮可以再点一次取消，例如取消加粗或去掉标题</li>
+                  <li>正文里按 <code>Esc</code> 可以移开焦点，这样 <code>Tab</code> 恢复为界面跳转</li>
+                  <li>草稿会自动存在浏览器本地；发布前会弹窗确认分支、待推送提交和本次改动的文件</li>
                 </ul>
               </div>
             </details>
