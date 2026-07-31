@@ -1,33 +1,65 @@
 {% assign comments = site.comments %}
 {% if comments and comments.enabled and comments.provider == 'giscus' and comments.repo and comments.repo_id and comments.category and comments.category_id %}
-  {% assign comment_lang = comments.lang | default: include.lang | default: site.lang | default: 'en-US' %}
-  {% if comment_lang == 'en-US' %}
+  {% assign comment_lang = include.lang | default: comments.lang | default: site.lang | default: 'en-US' %}
+  {% if comment_lang == 'en-US' or comment_lang == 'en-GB' or comment_lang == 'en' %}
     {% assign comment_lang = 'en' %}
-  {% elsif comment_lang == 'zh-Hans' %}
+  {% elsif comment_lang == 'zh-Hans' or comment_lang == 'zh-CN' or comment_lang == 'zh' %}
     {% assign comment_lang = 'zh-CN' %}
-  {% elsif comment_lang == 'zh-Hant' %}
+  {% elsif comment_lang == 'zh-Hant' or comment_lang == 'zh-TW' %}
     {% assign comment_lang = 'zh-TW' %}
+  {% elsif comment_lang == 'ja-JP' %}
+    {% assign comment_lang = 'ja' %}
   {% endif %}
+  {% assign configured_theme = comments.theme | default: 'light' %}
   <section class="post-comments" aria-label="Comments">
     <div class="post-comments-frame">
       <p class="post-comments-label">Comments</p>
       <div class="post-comments-widget">
-        <script
-          src="https://giscus.app/client.js"
-          data-repo="{{ comments.repo }}"
-          data-repo-id="{{ comments.repo_id }}"
-          data-category="{{ comments.category }}"
-          data-category-id="{{ comments.category_id }}"
-          data-mapping="{{ comments.mapping | default: 'pathname' }}"
-          data-strict="{{ comments.strict | default: 0 }}"
-          data-reactions-enabled="{{ comments.reactions_enabled | default: 1 }}"
-          data-emit-metadata="{{ comments.emit_metadata | default: 0 }}"
-          data-input-position="{{ comments.input_position | default: 'top' }}"
-          data-theme="{{ comments.theme | default: 'light' }}"
-          data-lang="{{ comment_lang }}"
-          data-loading="lazy"
-          crossorigin="anonymous"
-          async>
+        <div class="giscus"></div>
+        <script>
+          (function () {
+            var widget = document.currentScript && document.currentScript.parentElement;
+            if (!widget) {
+              return;
+            }
+
+            var root = document.documentElement;
+            var configuredTheme = {{ configured_theme | jsonify }};
+            var rootTheme = root.getAttribute('data-theme');
+            var initialTheme = configuredTheme;
+
+            if (rootTheme === 'dark') {
+              initialTheme = 'dark_dimmed';
+            } else if (rootTheme === 'light') {
+              initialTheme = 'light';
+            } else if (configuredTheme === 'preferred_color_scheme') {
+              initialTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark_dimmed'
+                : 'light';
+            }
+
+            var giscusScript = document.createElement('script');
+            giscusScript.src = 'https://giscus.app/client.js';
+            giscusScript.async = true;
+            giscusScript.crossOrigin = 'anonymous';
+            giscusScript.setAttribute('data-repo', {{ comments.repo | jsonify }});
+            giscusScript.setAttribute('data-repo-id', {{ comments.repo_id | jsonify }});
+            giscusScript.setAttribute('data-category', {{ comments.category | jsonify }});
+            giscusScript.setAttribute('data-category-id', {{ comments.category_id | jsonify }});
+            giscusScript.setAttribute('data-mapping', {{ comments.mapping | default: 'pathname' | jsonify }});
+            giscusScript.setAttribute('data-strict', {{ comments.strict | default: 0 | jsonify }});
+            giscusScript.setAttribute('data-reactions-enabled', {{ comments.reactions_enabled | default: 1 | jsonify }});
+            giscusScript.setAttribute('data-emit-metadata', {{ comments.emit_metadata | default: 0 | jsonify }});
+            giscusScript.setAttribute('data-input-position', {{ comments.input_position | default: 'top' | jsonify }});
+            giscusScript.setAttribute('data-theme', initialTheme || 'light');
+            giscusScript.setAttribute('data-lang', {{ comment_lang | jsonify }});
+            giscusScript.setAttribute('data-loading', 'lazy');
+            widget.appendChild(giscusScript);
+
+            if (window.__syncGiscusTheme) {
+              window.__syncGiscusTheme(rootTheme || (initialTheme === 'dark_dimmed' ? 'dark' : 'light'));
+            }
+          })();
         </script>
       </div>
     </div>

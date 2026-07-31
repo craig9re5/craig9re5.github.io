@@ -3,7 +3,7 @@ description: ようこそ　クレゴの世界へ
 description_lang: ja
 url: https://craig9re5.github.io
 baseurl: ""
-lang: en-US
+lang: en
 avatar_url: "https://avatars.githubusercontent.com/u/200924220?s=400&u=b3885895e64a7b94b007e42ef446a49b895ede6e&v=4"
 theme: jekyll-theme-cayman
 show_downloads: false
@@ -21,8 +21,8 @@ comments:
   reactions_enabled: 1
   emit_metadata: 0
   input_position: bottom
-  theme: preferred_color_scheme
-  lang: zh-CN
+  theme: light
+  lang: en
 exclude:
   - tools
   - tmp

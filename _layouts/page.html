@@ -4,7 +4,7 @@ layout: default
 
 {% include site-nav.html %}
 
-{% assign current_lang = page.lang | default: site.lang | default: 'en-US' %}
+{% assign current_lang = page.lang | default: site.lang | default: 'en' %}
 
 <article class="page-shell{% if page.page_class %} {{ page.page_class }}{% endif %}" lang="{{ current_lang }}">
     {% unless page.hide_page_heading %}

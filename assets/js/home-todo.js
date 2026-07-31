@@ -152,7 +152,9 @@
     const dueText = formatDue(dueAt);
     const dueClass = isOverdue(item) ? " is-overdue" : "";
     const dueChip = dueText
-      ? '<span class="todo-due-chip' + dueClass + '">' + escapeHtml(dueText) + "</span>"
+      ? '<span class="todo-due-chip' + dueClass + '">' +
+        (isOverdue(item) ? '<span class="sr-only">Overdue: </span>' : "") +
+        escapeHtml(dueText) + "</span>"
       : "";
 
     if (editingId === item.id) {
@@ -167,7 +169,7 @@
         "</label>",
         "</div>",
         '<div class="todo-actions">',
-        '<button type="submit" class="todo-action todo-action-save">Save</button>',
+         '<button type="submit" class="button-link todo-submit todo-action todo-action-save">Save</button>',
         '<button type="button" class="todo-action" data-action="cancel-edit">Cancel</button>',
         '</div>',
         "</form>",
@@ -178,7 +180,7 @@
     return [
       '<li class="todo-item', completedClass, '" data-id="', item.id, '">',
       '<label class="todo-check">',
-      '<input type="checkbox" data-action="toggle"', checked, ' aria-label="Toggle todo item">',
+       '<input type="checkbox" data-action="toggle"', checked, '>',
       '<span class="todo-body">',
       '<span class="todo-text">', escapeHtml(item.text), "</span>",
       dueChip,

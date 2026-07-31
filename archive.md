@@ -5,15 +5,15 @@ permalink: /archive/
 description: A running list of posts published on the site.
 kicker: Archive
 page_class: archive-page
-lang: en-US
-hide_page_heading: true
+lang: en
 ---
 
 
 {% if site.posts.size > 0 %}
 <section class="archive-search-section">
   <label class="archive-search-field" for="archive-search">
-    <input id="archive-search" type="search" placeholder="按标题或摘要搜索">
+    <span class="archive-search-label">Search by title or excerpt</span>
+    <input id="archive-search" type="search" placeholder="Search by title or excerpt">
   </label>
 </section>
 
@@ -23,14 +23,17 @@ hide_page_heading: true
     <span class="archive-date">{{ post.date | date: "%b %-d, %Y" }}</span>
     <div class="archive-entry">
       <div class="archive-entry-head">
-        <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+        <a href="{{ post.url | relative_url }}" lang="{{ post.lang | default: 'en' }}">{{ post.title }}</a>
       </div>
-      <p>{{ post.excerpt | strip_html | truncate: 170 }}</p>
+      {% assign archive_excerpt = post.excerpt | strip_html | strip %}
+      {% if archive_excerpt != "" %}
+      <p lang="{{ post.lang | default: 'en' }}">{{ archive_excerpt | truncate: 170 }}</p>
+      {% endif %}
     </div>
   </li>
   {% endfor %}
 </ul>
-<p class="empty-state archive-filter-empty" id="archive-filter-empty" hidden>没有匹配的文章。</p>
+<p class="empty-state archive-filter-empty" id="archive-filter-empty" hidden>No posts match that search.</p>
 {% else %}
 <p class="empty-state">No posts yet. Add a Markdown file to the _posts folder and it will appear here automatically.</p>
 {% endif %}

@@ -852,7 +852,7 @@ class ComposerRequestHandler(SimpleHTTPRequestHandler):
     def end_headers(self) -> None:
         self.send_header(
             "Content-Security-Policy",
-            # style-src / font-src 放行 Google Fonts：post-composer.css 第一行 @import 的
+            # style-src / font-src 放行 post-composer.html 通过 <link> 加载的 Google Fonts。
             # Outfit + Newsreader 是这套界面设计好的字体，在 'self' 下会被静默拦掉，
             # 整个工具一直跑在 Segoe UI 兜底上。内联样式仍然不放行，HTML 里不要再写 style=""。
             "default-src 'self'; script-src 'self'; "

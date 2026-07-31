@@ -1,25 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,300..800;1,6..72,300..800&display=swap');
-
+/* Keep these shared theme tokens aligned with assets/css/custom.css. */
 :root {
-  --page-bg: #f4efe4;
-  --surface: rgba(255, 253, 248, 0.96);
-  --surface-strong: #ffffff;
+  --page-bg: #eee8dc;
+  --surface-strong: #fffdf8;
   --text: #183233;
-  --muted: #5b7273;
+  --muted: #4f6667;
   --line: rgba(24, 50, 51, 0.12);
   --line-strong: rgba(24, 50, 51, 0.2);
   --accent: #1f6b63;
   --accent-deep: #123f43;
   --accent-soft: #e4f0eb;
-  --warn: #8d5d1d;
+  --warn: #875a10;
   --danger: #9b3b35;
   --shadow: 0 20px 45px rgba(18, 63, 67, 0.12);
-  --radius-xl: 22px;
+  --radius-xl: 24px;
   --radius-lg: 18px;
-  --radius-md: 14px;
+  --radius-md: 12px;
   --editor-font: Consolas, "SFMono-Regular", "Cascadia Mono", "Courier New", monospace;
-  --ui-font: "Outfit", "Segoe UI", "Noto Sans SC", "Microsoft YaHei", sans-serif;
-  --display-font: "Newsreader", Georgia, "Noto Serif SC", serif;
+  --ui-font: "Outfit", "Segoe UI", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --display-font: "Newsreader", "Noto Serif SC", "Noto Serif JP", Georgia, serif;
   
   /* Theme backgrounds variables */
   --card-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.98));
@@ -30,18 +28,17 @@
 }
 
 [data-theme="dark"] {
-  --page-bg: #0c1415;
-  --surface: rgba(18, 30, 31, 0.94);
-  --surface-strong: #152425;
-  --text: #e4ecec;
-  --muted: #8ea2a3;
-  --line: rgba(228, 236, 236, 0.12);
-  --line-strong: rgba(228, 236, 236, 0.22);
-  --accent: #3fa195;
-  --accent-deep: #ecf6f5;
-  --accent-soft: #173233;
-  --warn: #d19a43;
-  --danger: #d95a53;
+  --page-bg: #12181a;
+  --surface-strong: #202b2d;
+  --text: #e1e7e7;
+  --muted: #9bb0b1;
+  --line: rgba(225, 231, 231, 0.12);
+  --line-strong: rgba(225, 231, 231, 0.22);
+  --accent: #30b3a5;
+  --accent-deep: #85ebde;
+  --accent-soft: #1d3331;
+  --warn: #e8bd6d;
+  --danger: #ffad98;
   --shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
   
   /* Dark mode background overrides */
@@ -76,7 +73,7 @@
 
 [data-theme="dark"] body {
   background:
-    radial-gradient(circle at top left, rgba(63, 161, 149, 0.1), transparent 30%),
+    radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 10%, transparent), transparent 30%),
     radial-gradient(circle at bottom right, rgba(209, 154, 67, 0.06), transparent 25%),
     linear-gradient(180deg, #090f10 0%, var(--page-bg) 40%, #060a0b 100%);
 }
@@ -85,15 +82,15 @@
 [data-theme="dark"] select,
 [data-theme="dark"] textarea {
   background: #111d1e;
-  color: #e4ecec;
-  border-color: rgba(228, 236, 236, 0.16);
+  color: var(--text);
+  border-color: var(--line-strong);
 }
 
 [data-theme="dark"] input:focus,
 [data-theme="dark"] select:focus,
 [data-theme="dark"] textarea:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 4px rgba(63, 161, 149, 0.16);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent);
 }
 
 [data-theme="dark"] .masthead {
@@ -113,19 +110,19 @@
 }
 
 [data-theme="dark"] .preview-body code {
-  background: rgba(228, 236, 236, 0.08);
-  color: #3fa195;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  color: var(--accent);
 }
 
 [data-theme="dark"] .preview-body pre {
   background: #091213;
-  border: 1px solid rgba(228, 236, 236, 0.08);
+  border: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
 }
 
 [data-theme="dark"] .editor-area {
   background: #111d1e;
-  color: #e4ecec;
-  border-color: rgba(228, 236, 236, 0.16);
+  color: var(--text);
+  border-color: var(--line-strong);
 }
 
 [data-theme="dark"] .editor-area:focus {
@@ -133,24 +130,28 @@
 }
 
 [data-theme="dark"] .drawer-card summary {
-  color: #3fa195;
+  color: var(--accent);
 }
 
 [data-theme="dark"] .library-toggle {
-  background: rgba(228, 236, 236, 0.06);
-  border-color: rgba(228, 236, 236, 0.12);
-  color: #e4ecec;
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+  border-color: var(--line);
+  color: var(--text);
 }
 
 [data-theme="dark"] .library-toggle:hover {
-  background: rgba(63, 161, 149, 0.15);
-  border-color: rgba(63, 161, 149, 0.25);
-  color: #3fa195;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 25%, transparent);
+  color: var(--accent);
 }
 
 [data-theme="dark"] .library-rail {
   background:
-    linear-gradient(180deg, rgba(228, 236, 236, 0.055), rgba(228, 236, 236, 0.018));
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--text) 5.5%, transparent),
+      color-mix(in srgb, var(--text) 1.8%, transparent)
+    );
 }
 
 [data-theme="dark"] .layout.library-expanded .library-rail {
@@ -340,9 +341,9 @@ select {
 }
 
 .masthead-status .status-chip.offline {
-  background: rgba(155, 59, 53, 0.35);
+  background: color-mix(in srgb, var(--danger) 35%, transparent);
   color: #ffcdd2;
-  border: 1px solid rgba(155, 59, 53, 0.5);
+  border: 1px solid color-mix(in srgb, var(--danger) 50%, transparent);
 }
 
 .eyebrow,
@@ -632,7 +633,7 @@ h1 {
 }
 
 .post-library-delete-btn {
-  border: 1px solid rgba(155, 59, 53, 0.16);
+  border: 1px solid color-mix(in srgb, var(--danger) 16%, transparent);
   background: rgba(255, 255, 255, 0.78);
   color: var(--danger);
 }
@@ -680,8 +681,8 @@ h1 {
 }
 
 .post-library-local-status.is-hidden {
-  border-color: rgba(155, 59, 53, 0.2);
-  background: rgba(155, 59, 53, 0.08);
+  border-color: color-mix(in srgb, var(--danger) 20%, transparent);
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
   color: var(--danger);
 }
 
@@ -751,7 +752,7 @@ h1 {
 }
 
 .status-chip.offline {
-  background: rgba(155, 59, 53, 0.1);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
   color: var(--danger);
 }
 
@@ -843,9 +844,14 @@ textarea {
 input:focus,
 select:focus,
 textarea:focus {
-  outline: none;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
   border-color: rgba(31, 107, 99, 0.42);
   box-shadow: 0 0 0 4px rgba(31, 107, 99, 0.11);
+}
+
+:where(a, button, summary, input, select, textarea):focus-visible {
+  outline-color: var(--accent);
 }
 
 textarea {
@@ -973,7 +979,7 @@ textarea {
 .tag-pill.selected:hover {
   background: var(--danger);
   border-color: var(--danger);
-  box-shadow: 0 3px 8px rgba(155, 59, 53, 0.16);
+  box-shadow: 0 3px 8px color-mix(in srgb, var(--danger) 16%, transparent);
   transform: translateY(-1px);
 }
 
@@ -1163,11 +1169,12 @@ textarea {
 }
 
 [data-theme="dark"] .editor-area {
-  color: #e4ecec;
+  color: var(--text);
 }
 
 .editor-area:focus {
-  outline: none;
+  outline: 2px solid transparent;
+  outline-offset: -2px;
   background-color: transparent;
 }
 
@@ -1428,7 +1435,7 @@ textarea {
 }
 
 .hidden {
-  display: none !important;
+  display: none;
 }
 
 /* ============================================================
@@ -1514,7 +1521,8 @@ textarea {
 }
 
 .title-input:focus {
-  outline: none;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
   box-shadow: none;
   border-bottom: 2px solid var(--accent);
 }

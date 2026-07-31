@@ -1,6 +1,7 @@
+{% assign current_year = site.time | date: "%Y" %}
 <footer class="site-footer">
   <div class="site-footer-inner">
-    <p>&copy; 2026 Craig Tateishi.</p>
-    <p>Designed for clarity and elegance.</p>
+    <p>&copy; {{ current_year }} {{ site.title | escape }}.</p>
+    <p><a href="{{ '/feed.xml' | relative_url }}">RSS</a></p>
   </div>
 </footer>
