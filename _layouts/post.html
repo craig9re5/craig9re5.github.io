@@ -29,13 +29,6 @@ layout: default
             {% endunless %}
         </div>
         <h1>{{ page.title }}</h1>
-        {% if page.tags and page.tags.size > 0 %}
-        <div class="post-tags-row" aria-label="Tags">
-            {% for tag in page.tags %}
-            <a class="post-tag-chip" href="{{ '/archive/' | relative_url }}?tag={{ tag | url_encode }}">{{ tag }}</a>
-            {% endfor %}
-        </div>
-        {% endif %}
     </header>
 
     <div class="post-local-edit" id="post-local-edit" data-post-file="{{ page.name | escape }}" hidden>
