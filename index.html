@@ -1,12 +1,11 @@
 ---
 layout: home
 title: Home
-lang: en
+lang: en-US
 ---
 
 <section class="home-hero">
-  <h1 class="home-hero-title">Notes on food, cities, and ideas worth keeping.</h1>
-  <p class="home-hero-copy">A personal notebook for things I notice, taste, and want to remember.</p>
+  <h1 class="home-hero-title">Notes on code, projects, and ideas worth keeping.</h1>
   <div class="hero-actions">
     <a class="button-link" href="{{ '/about/' | relative_url }}">About Me</a>
     <a class="button-link button-link-secondary" href="{{ '/archive/' | relative_url }}">Browse Archive</a>
@@ -57,13 +56,12 @@ lang: en
       </button>
     </div>
   </div>
-  <p class="todo-section-copy" id="todo-section-copy">Saved only in this browser — nothing is uploaded or shared.</p>
 
   <div id="home-todo-card" class="todo-card" data-storage-key="home-todo-v1">
     <form class="todo-form" novalidate>
       <label class="todo-input-wrap" for="home-todo-input">
         <span class="sr-only">Add a todo item</span>
-        <input id="home-todo-input" class="todo-input" name="todo" type="text" maxlength="180" placeholder="Add a task (stays in this browser)">
+        <input id="home-todo-input" class="todo-input" name="todo" type="text" maxlength="180" placeholder="Add a task for this machine">
       </label>
       <label class="todo-due-field" for="home-todo-due">
         <span class="todo-due-label">Due</span>
