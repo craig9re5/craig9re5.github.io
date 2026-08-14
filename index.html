@@ -41,34 +41,23 @@ lang: en
   {% endif %}
 </section>
 
-<section class="content-section library-link-section" aria-labelledby="library-link-title">
-  <div class="library-link-layout">
-    <div class="library-link-copy">
-      <div class="section-heading">
-        <div>
-          <p class="section-label">Library</p>
-          <h2 id="library-link-title" lang="zh-Hans">拾页书馆</h2>
-        </div>
-      </div>
-      <p class="home-hero-copy">A separate site where I keep book notes and reading lists.</p>
-    </div>
-    <a
-      class="button-link library-link-action"
-      href="https://craig9re5.github.io/SwimLibrary/"
-      target="_blank"
-      rel="noopener noreferrer"
-    >Visit Library <span aria-hidden="true">↗</span></a>
-  </div>
-</section>
-
-<section class="content-section todo-section">
+<section class="content-section todo-section" id="todo-section">
   <div class="section-heading todo-section-heading">
     <div>
       <p class="section-label">Local only</p>
       <h2>TODO</h2>
     </div>
+    <div class="todo-heading-actions">
+      <span class="todo-count-badge" id="todo-count-badge" hidden>0 tasks</span>
+      <button class="todo-toggle-btn" id="todo-toggle-btn" type="button" aria-expanded="true" aria-controls="home-todo-card">
+        <span class="todo-toggle-text">Collapse</span>
+        <svg class="todo-toggle-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+        </svg>
+      </button>
+    </div>
   </div>
-  <p class="todo-section-copy">Saved only in this browser — nothing is uploaded or shared.</p>
+  <p class="todo-section-copy" id="todo-section-copy">Saved only in this browser — nothing is uploaded or shared.</p>
 
   <div id="home-todo-card" class="todo-card" data-storage-key="home-todo-v1">
     <form class="todo-form" novalidate>

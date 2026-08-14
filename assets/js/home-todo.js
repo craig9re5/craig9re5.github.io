@@ -197,6 +197,55 @@
   function render() {
     list.innerHTML = items.map(itemMarkup).join("");
     empty.hidden = items.length > 0;
+    updateBadge();
+  }
+
+  function updateBadge() {
+    const badge = document.getElementById("todo-count-badge");
+    if (!badge) return;
+    if (items.length === 0) {
+      badge.hidden = true;
+    } else {
+      badge.hidden = false;
+      const pendingCount = items.filter(function (i) { return !i.completed; }).length;
+      badge.textContent = pendingCount === 0 ? "All done (" + items.length + ")" : pendingCount + " pending";
+    }
+  }
+
+  function setupCollapseToggle() {
+    const toggleBtn = document.getElementById("todo-toggle-btn");
+    const sectionCopy = document.getElementById("todo-section-copy");
+    const COLLAPSE_KEY = "home-todo-collapsed-v1";
+    if (!toggleBtn) return;
+
+    let isCollapsed = false;
+    try {
+      isCollapsed = window.localStorage.getItem(COLLAPSE_KEY) === "true";
+    } catch (e) {
+      isCollapsed = false;
+    }
+
+    function applyCollapseState(collapsed) {
+      isCollapsed = collapsed;
+      root.classList.toggle("is-collapsed", isCollapsed);
+      if (sectionCopy) {
+        sectionCopy.classList.toggle("is-collapsed", isCollapsed);
+      }
+      toggleBtn.setAttribute("aria-expanded", String(!isCollapsed));
+      const toggleText = toggleBtn.querySelector(".todo-toggle-text");
+      if (toggleText) {
+        toggleText.textContent = isCollapsed ? "Expand" : "Collapse";
+      }
+      try {
+        window.localStorage.setItem(COLLAPSE_KEY, String(isCollapsed));
+      } catch (e) {}
+    }
+
+    toggleBtn.addEventListener("click", function () {
+      applyCollapseState(!isCollapsed);
+    });
+
+    applyCollapseState(isCollapsed);
   }
 
   function createItem(text, dueAt) {
@@ -230,12 +279,7 @@
     items.push(createItem(trimmed, dueAt));
     writeItems();
     render();
-    form.reset();
-    if (dueInput) {
-      dueInput.value = getTomorrowNineAM();
-    }
-    input.focus();
-    setStatus("");
+    setStatus("Task added.");
   }
 
   function updateItem(id, updater) {
@@ -250,28 +294,42 @@
     render();
   }
 
+  function deleteItem(id) {
+    items = items.filter((item) => item.id !== id);
+    writeItems();
+    render();
+    setStatus("Task removed.");
+  }
+
   form.addEventListener("submit", function (event) {
     event.preventDefault();
     addItem(input.value, dueInput ? dueInput.value : "");
+    input.value = "";
+    if (dueInput) {
+      dueInput.value = getTomorrowNineAM();
+    }
+    input.focus();
   });
 
   list.addEventListener("click", function (event) {
-    const button = event.target.closest("[data-action]");
-    if (!button) {
+    const actionBtn = event.target.closest("[data-action]");
+    if (!actionBtn) {
       return;
     }
 
-    const itemEl = button.closest(".todo-item");
+    const itemEl = actionBtn.closest(".todo-item");
     if (!itemEl) {
       return;
     }
 
     const id = itemEl.dataset.id;
-    if (!id) {
+    const action = actionBtn.dataset.action;
+
+    if (action === "delete") {
+      deleteItem(id);
       return;
     }
 
-    const action = button.dataset.action;
     if (action === "edit") {
       editingId = id;
       render();
@@ -283,20 +341,9 @@
       return;
     }
 
-    if (action === "cancel-edit") {
+    if (action === "cancel") {
       editingId = null;
       render();
-      return;
-    }
-
-    if (action === "delete") {
-      items = items.filter((item) => item.id !== id);
-      if (editingId === id) {
-        editingId = null;
-      }
-      writeItems();
-      render();
-      setStatus("");
     }
   });
 
@@ -372,5 +419,6 @@
   }
 
   items = readItems();
+  setupCollapseToggle();
   render();
 })();

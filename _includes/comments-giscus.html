@@ -14,11 +14,26 @@
   <section class="post-comments" aria-label="Comments">
     <div class="post-comments-frame">
       <p class="post-comments-label">Comments</p>
-      <div class="post-comments-widget">
+      <div class="post-comments-widget" id="post-comments-widget">
+        <div class="giscus-skeleton" id="giscus-skeleton" aria-hidden="true">
+          <div class="skeleton-row skeleton-header-row">
+            <div class="skeleton-avatar"></div>
+            <div class="skeleton-box skeleton-input-box"></div>
+          </div>
+          <div class="skeleton-row skeleton-comment-row">
+            <div class="skeleton-avatar skeleton-avatar-sm"></div>
+            <div class="skeleton-lines">
+              <div class="skeleton-box skeleton-line-title"></div>
+              <div class="skeleton-box skeleton-line-text"></div>
+              <div class="skeleton-box skeleton-line-short"></div>
+            </div>
+          </div>
+        </div>
         <div class="giscus"></div>
         <script>
           (function () {
-            var widget = document.currentScript && document.currentScript.parentElement;
+            var widget = document.getElementById('post-comments-widget');
+            var skeleton = document.getElementById('giscus-skeleton');
             if (!widget) {
               return;
             }
@@ -37,6 +52,40 @@
                 ? 'dark_dimmed'
                 : 'light';
             }
+
+            function hideSkeleton() {
+              if (skeleton && !skeleton.hidden) {
+                skeleton.style.opacity = '0';
+                skeleton.style.pointerEvents = 'none';
+                setTimeout(function () {
+                  skeleton.hidden = true;
+                }, 350);
+              }
+            }
+
+            // Listen for Giscus iframe load or message
+            window.addEventListener('message', function (event) {
+              if (event.origin === 'https://giscus.app' && event.data && event.data.giscus) {
+                hideSkeleton();
+              }
+            });
+
+            // Observer to catch iframe creation and add load event
+            if (window.MutationObserver) {
+              var observer = new MutationObserver(function () {
+                var iframe = widget.querySelector('iframe.giscus-frame');
+                if (iframe) {
+                  iframe.addEventListener('load', function () {
+                    setTimeout(hideSkeleton, 150);
+                  });
+                  observer.disconnect();
+                }
+              });
+              observer.observe(widget, { childList: true, subtree: true });
+            }
+
+            // Fallback timeout in case events are missed
+            setTimeout(hideSkeleton, 5000);
 
             var giscusScript = document.createElement('script');
             giscusScript.src = 'https://giscus.app/client.js';
