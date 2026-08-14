@@ -485,6 +485,8 @@ header.masthead,
 [data-theme="dark"] .post-library-item-title {
   color: var(--accent);
 }
+
+.subhead {
   max-width: 48rem;
   margin: 0.95rem 0 0;
   color: rgba(247, 249, 247, 0.9);
@@ -1730,7 +1732,6 @@ textarea {
    这里把它改成固定视口高度的应用外壳：外层不滚动，
    正文和预览各自独立滚动，动作栏永远在视野里。
    ============================================================ */
-@media (min-width: 1201px) and (min-height: 640px) {
 @media (min-width: 1024px) {
   .shell {
     padding: 24px 28px 40px;
