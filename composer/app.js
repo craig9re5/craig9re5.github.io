@@ -53,6 +53,8 @@ const toolbarButtons = document.querySelectorAll("[data-action]");
 
 // Modals and Mobile controls
 const openSettingsBtn = document.querySelector("#open-settings-btn");
+const cloudPromptBanner = document.querySelector("#cloud-prompt-banner");
+const bannerSettingsBtn = document.querySelector("#banner-settings-btn");
 const settingsModal = document.querySelector("#settings-modal");
 const closeSettingsModalBtn = document.querySelector("#close-settings-modal-btn");
 const ghTokenInput = document.querySelector("#gh-token-input");
@@ -319,12 +321,14 @@ function updateEngineDisplay() {
 
   if (state.engine === ENGINE_LOCAL) {
     if (state.serviceReady) {
-      engineLabel.textContent = "🟢 本地模式";
+      engineLabel.textContent = "🟢 本地服务";
       engineChip.title = "已连接本地服务 (127.0.0.1:4173)。点击可切换或配置。";
+      if (cloudPromptBanner) cloudPromptBanner.hidden = true;
     } else {
       engineChip.classList.add("error");
       engineLabel.textContent = "🔴 本地离线";
       engineChip.title = "本地服务未连接。点击可切换到 GitHub 云端直发模式。";
+      if (cloudPromptBanner) cloudPromptBanner.hidden = false;
     }
     if (radioLocal) radioLocal.checked = true;
   } else {
@@ -332,9 +336,11 @@ function updateEngineDisplay() {
     if (state.githubToken) {
       engineLabel.textContent = "☁️ GitHub 直发";
       engineChip.title = "GitHub API 直连模式 (已配置 Token)。点击可查看详情。";
+      if (cloudPromptBanner) cloudPromptBanner.hidden = true;
     } else {
-      engineLabel.textContent = "☁️ 配置 Token";
+      engineLabel.textContent = "☁️ 待配置 Token";
       engineChip.title = "请点击填入 GitHub Token 以启用手机/云端发帖。";
+      if (cloudPromptBanner) cloudPromptBanner.hidden = false;
     }
     if (radioCloud) radioCloud.checked = true;
   }
@@ -1299,6 +1305,7 @@ function initEventListeners() {
 
   // Modals
   openSettingsBtn?.addEventListener("click", openSettingsModal);
+  bannerSettingsBtn?.addEventListener("click", openSettingsModal);
   engineChip?.addEventListener("click", openSettingsModal);
   closeSettingsModalBtn?.addEventListener("click", closeSettingsModal);
   settingsModal?.addEventListener("click", (e) => {

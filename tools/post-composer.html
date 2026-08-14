@@ -19,15 +19,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&amp;family=Newsreader:ital,opsz,wght@0,6..72,300..800;1,6..72,300..800&amp;family=Noto+Sans+SC:wght@400;500;700&amp;family=Noto+Serif+JP:wght@500;700&amp;family=Noto+Serif+SC:wght@400;500;700&amp;display=swap">
-    <link rel="stylesheet" href="./post-composer.css">
+    <link rel="stylesheet" href="./style.css">
   </head>
   <body>
     <div class="shell">
       <header class="panel masthead">
         <div class="masthead-inner">
-          <div class="masthead-copy">
-            <p class="eyebrow">Craig's Blog Composer</p>
-            <h1>发帖器</h1>
+          <div class="masthead-brand">
+            <p class="eyebrow">Craig's Blog</p>
+            <h1 class="masthead-title">博客发帖器</h1>
           </div>
 
           <!-- Mobile View Segmented Switcher (Visible on mobile screens) -->
@@ -38,22 +38,23 @@
 
           <div class="masthead-status">
             <!-- Engine Mode Chip (Clickable for settings) -->
-            <button class="status-chip mode-chip" id="engine-chip" type="button" title="点击查看或切换运行模式 (本地 / GitHub 云端)">
+            <button class="mode-chip" id="engine-chip" type="button" title="点击查看或切换运行模式 (本地 / GitHub 云端)">
               <span class="engine-indicator-dot"></span>
               <span id="engine-label">正在连接...</span>
             </button>
             
-            <!-- Settings / Token Config Button -->
-            <button class="tool-button" id="open-settings-btn" type="button" title="设置与 GitHub Token 配置">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Prominent Settings Button with Text & Icon -->
+            <button class="masthead-btn" id="open-settings-btn" type="button" title="设置与 GitHub Token 配置">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="3"></circle>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
               </svg>
+              <span>设置</span>
             </button>
 
             <!-- Theme Toggle -->
-            <button class="tool-button theme-toggle-btn" id="theme-toggle" type="button" title="切换深色/浅色模式">
-              <svg id="theme-toggle-icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <button class="masthead-btn icon-only theme-toggle-btn" id="theme-toggle" type="button" title="切换深色/浅色模式">
+              <svg id="theme-toggle-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                 <path d="M12.3 22h-.1c-5.5 0-10-4.5-10-10 0-4.8 3.5-8.9 8.2-9.8.6-.1 1.2.3 1.3.9.1.6-.2 1.2-.8 1.4-2.8 1-4.7 3.5-4.7 6.5 0 3.9 3.1 7 7 7 3 0 5.5-1.9 6.5-4.7.2-.6.8-.9 1.4-.8.6.1 1 .7.9 1.3-.9 4.7-5 8.2-9.7 8.2z"/>
               </svg>
             </button>
@@ -100,27 +101,37 @@
         <!-- Main Content & Preview Area -->
         <div class="content-split">
           <main class="composer-main" id="view-writer">
+            <!-- Cloud Mode Prompt Banner (Shown if in cloud mode without token) -->
+            <div class="cloud-prompt-banner" id="cloud-prompt-banner" hidden>
+              <div class="banner-icon">☁️</div>
+              <div class="banner-text">
+                <strong>已启用云端/手机直发模式 (方案 B)</strong>
+                <span>点击右侧按钮填入 GitHub Token，即可随时随地在手机或电脑写文拍照并直接发布。</span>
+              </div>
+              <button class="action-button primary compact" id="banner-settings-btn" type="button">⚙️ 配置 GitHub Token</button>
+            </div>
+
             <section class="panel composer-workspace">
               <section class="editor-card stack">
                 <div class="section-heading composer-titlebar">
                   <h2 class="section-title visually-hidden" id="composer-heading">新建文章</h2>
-                  <input id="title" name="title" type="text" class="title-input" placeholder="文章标题" aria-label="文章标题" required>
+                  <input id="title" name="title" type="text" class="title-input" placeholder="输入文章标题..." aria-label="文章标题" required>
                   <div class="composer-mode-row">
                     <div class="status-chip" id="composer-mode-chip">新建模式</div>
                   </div>
                 </div>
 
                 <div class="field-group tag-field">
-                  <span class="field-label">标签</span>
+                  <span class="field-label">文章标签</span>
                   <div class="tag-chip-list" id="selected-tags" aria-live="polite"></div>
                   <div class="tag-input-row">
-                    <input id="tags-input" name="tags" type="text" placeholder="输入标签后按 Enter 或逗号">
-                    <button class="action-button secondary compact" id="add-tag" type="button">创建新标签</button>
+                    <input id="tags-input" name="tags" type="text" placeholder="输入标签后按 Enter 或逗号添加">
+                    <button class="action-button secondary compact" id="add-tag" type="button">添加标签</button>
                   </div>
                 </div>
 
                 <details class="drawer-card" id="advanced-fields">
-                  <summary>文章设置</summary>
+                  <summary>文章设置 (语言、发布时间、摘要、Slug、密码)</summary>
                   <div class="details-body stack">
                     <div class="grid two">
                       <label>
@@ -140,13 +151,13 @@
                     </div>
 
                     <label>
-                      <span class="field-label">摘要 (默认保持为空)</span>
+                      <span class="field-label">摘要 (留空默认保持为空，不自动生成)</span>
                       <textarea id="excerpt" name="excerpt" rows="2" placeholder="首页和 Archive 用的摘要。留空即保持为空，不自动生成。"></textarea>
                     </label>
 
                     <label>
                       <span class="field-label">文件 Slug</span>
-                      <input id="slug" name="slug" type="text" placeholder="默认根据标题/拼音自动生成">
+                      <input id="slug" name="slug" type="text" placeholder="默认根据标题自动生成">
                       <span class="field-help" id="slug-help">建议使用英文、数字和连字符。留空时会自动生成安全 slug。</span>
                     </label>
 
@@ -275,7 +286,7 @@
                 <div class="details-body">
                   <ul class="helper-list">
                     <li><strong>🚀 一键发布</strong>：点击「发布到博客」或按 <code>Ctrl + Enter</code>，全自动完成保存并推送到 GitHub。</li>
-                    <li><strong>📱 手机发帖 (方案 B)</strong>：在手机浏览器打开本页，点击右上角 ⚙️ 填入 GitHub Token，即可随时随地拍照写文直接发布！</li>
+                    <li><strong>📱 手机发帖 (方案 B)</strong>：在手机浏览器打开本页，点击右上角「⚙️ 设置」填入 GitHub Token，即可随时随地拍照写文直接发布！</li>
                     <li><strong>📷 插图</strong>：桌面可直接 <code>Ctrl + V</code> 粘贴截图或拖入；手机可点击工具栏相机直接拍照上传。</li>
                     <li><strong>⌨️ 常用快捷键</strong>：<code>Ctrl + Enter</code> 发布、<code>Ctrl + S</code> 存草稿、<code>Ctrl + B</code> 粗体、<code>Ctrl + K</code> 链接。</li>
                   </ul>
@@ -402,7 +413,7 @@
 
     <!-- Scripts -->
     <script src="./crypto-js.min.js"></script>
-    <script src="./post-composer-renderer.js"></script>
-    <script src="./post-composer-app.js"></script>
+    <script src="./renderer.js"></script>
+    <script src="./app.js"></script>
   </body>
 </html>
