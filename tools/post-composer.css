@@ -2134,28 +2134,50 @@ textarea {
 .settings-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 20px;
 }
 
+.settings-header .modal-title {
+  margin: 0;
+  font-size: 1.4rem;
+  font-family: var(--display-font);
+  color: var(--accent-deep);
+}
+
+[data-theme="dark"] .settings-header .modal-title {
+  color: var(--accent);
+}
+
 .settings-section {
-  padding-bottom: 18px;
+  padding-bottom: 16px;
   border-bottom: 1px solid var(--line);
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.settings-section:last-child {
-  border-bottom: 0;
-  padding-bottom: 0;
-}
-
-.section-subheading {
-  font-size: 1rem;
+.settings-label {
+  font-size: 0.92rem;
   font-weight: 600;
   color: var(--text);
-  margin: 0;
+}
+
+.section-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.token-link {
+  font-size: 0.82rem;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.token-link:hover {
+  text-decoration: underline;
 }
 
 .engine-toggle-grid {
@@ -2171,30 +2193,32 @@ textarea {
 .engine-card {
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-md);
-  padding: 14px;
+  padding: 12px 14px;
   cursor: pointer;
   transition: all 0.2s ease;
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
+  background: var(--surface-card);
 }
 
 .engine-option input:checked + .engine-card {
   border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
   box-shadow: 0 0 0 2px var(--accent);
 }
 
 .engine-title {
   font-weight: 600;
   font-size: 0.9rem;
+  color: var(--text);
 }
 
 .engine-desc {
   font-size: 0.78rem;
   color: var(--muted);
-  line-height: 1.4;
+  line-height: 1.35;
 }
 
 .token-input-group {
@@ -2208,14 +2232,11 @@ textarea {
   font-size: 0.9rem;
 }
 
-.token-help-row {
-  font-size: 0.85rem;
-}
-
 .token-action-row {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
+  align-items: center;
 }
 
 .token-status-text {
@@ -2227,14 +2248,25 @@ textarea {
 .token-status-text.success { color: #10b981; }
 .token-status-text.error { color: var(--danger); }
 
-.meta-row {
+.settings-footer-info {
   display: flex;
-  justify-content: space-between;
-  font-size: 0.85rem;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--muted);
+  padding-top: 4px;
 }
 
-.meta-name { color: var(--muted); }
-.meta-val { font-weight: 500; }
+.action-button.ghost.danger {
+  color: var(--danger);
+  background: transparent;
+  border-color: transparent;
+}
+.action-button.ghost.danger:hover {
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  border-color: color-mix(in srgb, var(--danger) 25%, transparent);
+}
 
 /* Responsive Rules for Mobile vs Desktop */
 @media (max-width: 860px) {

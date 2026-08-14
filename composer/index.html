@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>Post Composer - 博客发帖器</title>
+    <title>发帖器</title>
     
     <!-- PWA & Mobile Web App Meta -->
     <link rel="manifest" href="./manifest.json">
@@ -14,7 +14,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="发帖器">
-    <meta name="description" content="个人博客极速写作与跨端发帖器，支持独立App与GitHub直发。">
+    <meta name="description" content="个人博客极速发帖器">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,8 +27,7 @@
       <header class="masthead" id="app-masthead">
         <div class="masthead-inner">
           <div class="masthead-brand">
-            <p class="eyebrow">Craig's Blog</p>
-            <h1 class="masthead-title">博客发帖器</h1>
+            <h1 class="masthead-title">发帖器</h1>
           </div>
 
           <!-- Mobile View Segmented Switcher (Visible on mobile screens) -->
@@ -39,13 +38,13 @@
 
           <div class="masthead-status">
             <!-- Engine Mode Chip (Clickable for settings) -->
-            <button class="mode-chip" id="engine-chip" type="button" title="点击查看或切换运行模式 (本地 / GitHub 云端)">
+            <button class="mode-chip" id="engine-chip" type="button" title="点击切换运行模式">
               <span class="engine-indicator-dot"></span>
               <span id="engine-label">正在连接...</span>
             </button>
             
-            <!-- Prominent Settings Button with Text & Icon -->
-            <button class="masthead-btn" id="open-settings-btn" type="button" title="设置与安全权限配置">
+            <!-- Settings Button -->
+            <button class="masthead-btn" id="open-settings-btn" type="button" title="设置">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="3"></circle>
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -69,40 +68,28 @@
       <section class="auth-gate-card panel" id="auth-gate-screen" hidden>
         <div class="auth-gate-inner">
           <div class="auth-icon-badge">🔒</div>
-          <h2 class="auth-title">博主管理权限验证</h2>
+          <h2 class="auth-title">发帖器权限验证</h2>
           <p class="auth-desc">
-            本控制台直接接入 GitHub 底层仓库。<strong>未授权访客无任何读写或发布权限</strong>。<br>
-            请输入你的 GitHub Personal Access Token (PAT) 验证管理员身份以解锁发帖器。
+            请输入你的 GitHub 访问令牌 (Token) 以解锁发帖控制台。
           </p>
 
           <div class="auth-form-box stack">
             <div class="token-input-group">
-              <input type="password" id="gate-token-input" placeholder="输入 GitHub Personal Access Token (ghp_...)" autocomplete="off">
-              <button class="action-button secondary compact" id="gate-toggle-token-btn" type="button">👁️</button>
+              <input type="password" id="gate-token-input" placeholder="输入 GitHub Token (ghp_...)" autocomplete="off">
+              <button class="action-button secondary compact icon-only" id="gate-toggle-token-btn" type="button" title="显示/隐藏">👁️</button>
             </div>
             
             <div class="auth-actions-row">
-              <a href="https://github.com/settings/tokens/new?scopes=repo&amp;description=Craig%20Blog%20Composer" target="_blank" rel="noopener noreferrer" class="text-link">
-                ↗️ 在 GitHub 创建 Token (勾选 repo 权限)
+              <a href="https://github.com/settings/tokens/new?scopes=repo&amp;description=Craig%20Blog%20Composer" target="_blank" rel="noopener noreferrer" class="token-link">
+                获取 Token (需 repo 权限) ↗
               </a>
               <button class="action-button primary" id="gate-unlock-btn" type="button">
                 <span class="btn-icon">🔓</span>
-                <span class="btn-text">验证并解锁控制台</span>
+                <span class="btn-text">验证并解锁</span>
               </button>
             </div>
 
             <p id="gate-status-msg" class="auth-status-text"></p>
-          </div>
-
-          <div class="auth-security-notes">
-            <div class="sec-note-item">
-              <span class="sec-icon">🛡️</span>
-              <span><strong>绝对安全保证</strong>：Token 仅加密缓存在你当前设备的本地浏览器中，绝不上报任何第三方服务器。</span>
-            </div>
-            <div class="sec-note-item">
-              <span class="sec-icon">🚫</span>
-              <span><strong>零权限保护</strong>：任何未经授权的外来访问者均无法通过 GitHub API 修改或发布任何博文。</span>
-            </div>
           </div>
         </div>
       </section>
@@ -126,7 +113,6 @@
 
           <div class="library-content" id="library-content">
             <div class="library-header">
-              <span class="eyebrow">Library</span>
               <h2>文章库</h2>
               <button class="action-button primary compact" id="new-post" type="button" title="新建文章">
                 <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
@@ -136,7 +122,7 @@
               </button>
             </div>
             <div class="library-search">
-              <input id="post-search" name="post-search" type="text" placeholder="按标题、文件名或标签搜索">
+              <input id="post-search" name="post-search" type="text" placeholder="搜索标题、文件名或标签...">
             </div>
             <div class="post-library-list" id="post-list" aria-live="polite"></div>
           </div>
@@ -159,7 +145,7 @@
                   <span class="field-label">文章标签</span>
                   <div class="tag-chip-list" id="selected-tags" aria-live="polite"></div>
                   <div class="tag-input-row">
-                    <input id="tags-input" name="tags" type="text" placeholder="输入标签后按 Enter 或逗号添加">
+                    <input id="tags-input" name="tags" type="text" placeholder="输入标签后按 Enter 添加">
                     <button class="action-button secondary compact" id="add-tag" type="button">添加标签</button>
                   </div>
                 </div>
@@ -274,7 +260,7 @@
                             <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /><path d="M17 5v6M14 8h6" />
                           </svg>
                         </button>
-                        <button class="tool-button mobile-only-btn" id="mobile-camera-btn" type="button" title="拍照直接插入插图">
+                        <button class="tool-button mobile-only-btn" id="mobile-camera-btn" type="button" title="拍照插入图片">
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
                             <circle cx="12" cy="13" r="4"></circle>
@@ -293,7 +279,7 @@
                     class="editor-area"
                     name="body"
                     spellcheck="false"
-                    placeholder="这里直接输入 Markdown 正文。支持粘贴/拖拽图片、Ctrl+B、Ctrl+I、Ctrl+Enter 一键发布。"
+                    placeholder="输入 Markdown 正文。支持粘贴/拖拽图片、Ctrl+B、Ctrl+I、Ctrl+Enter 一键发布。"
                     required
                   ></textarea>
                 </div>
@@ -301,10 +287,10 @@
                 <div class="action-row">
                   <div class="editor-meta">
                     <span id="editor-stats">0 字符 | 0 行</span>
-                    <span id="file-name" class="editor-target-file" title="保存后生成的文件名">填了标题后这里会显示文件名</span>
+                    <span id="file-name" class="editor-target-file" title="保存后生成的文件名"></span>
                   </div>
                   <div class="action-buttons">
-                    <button class="action-button ghost compact" id="download-post" type="button" title="把当前内容导出为 .md 备份">导出 .md</button>
+                    <button class="action-button ghost compact" id="download-post" type="button" title="导出 .md 备份">导出 .md</button>
                     <button class="action-button primary" id="save-publish-post" type="button">
                       <span class="btn-icon">🚀</span>
                       <span class="btn-text">发布到博客</span>
@@ -316,11 +302,11 @@
               </section>
 
               <details class="drawer-card helper-drawer">
-                <summary>快捷键与移动发帖帮助</summary>
+                <summary>快捷键与发帖帮助</summary>
                 <div class="details-body">
                   <ul class="helper-list">
-                    <li><strong>🚀 一键发布</strong>：点击「发布到博客」或按 <code>Ctrl + Enter</code>，全自动完成保存并推送到 GitHub。</li>
-                    <li><strong>📱 手机发帖 (方案 B)</strong>：在手机浏览器打开本页，点击右上角「⚙️ 设置」填入 GitHub Token，即可随时随地拍照写文直接发布！</li>
+                    <li><strong>🚀 一键发布</strong>：点击「发布到博客」或按 <code>Ctrl + Enter</code>，全自动保存并推送到 GitHub。</li>
+                    <li><strong>📱 手机发帖</strong>：在手机浏览器打开本页，在设置中填入 GitHub Token，即可随时随地拍照写文发布。</li>
                     <li><strong>📷 插图</strong>：桌面可直接 <code>Ctrl + V</code> 粘贴截图或拖入；手机可点击工具栏相机直接拍照上传。</li>
                     <li><strong>⌨️ 常用快捷键</strong>：<code>Ctrl + Enter</code> 发布、<code>Ctrl + S</code> 存草稿、<code>Ctrl + B</code> 粗体、<code>Ctrl + K</code> 链接。</li>
                   </ul>
@@ -333,7 +319,6 @@
           <aside class="panel preview-panel" id="view-preview">
             <div class="preview-panel-inner">
               <div class="preview-heading">
-                <p class="section-kicker">Live Preview</p>
                 <h2 class="section-title">实时预览</h2>
               </div>
 
@@ -342,7 +327,7 @@
                 <h1 id="preview-title">在左边输入标题和正文</h1>
                 <div class="preview-tags" id="preview-tags"></div>
                 <div class="preview-body" id="preview-host">
-                  <p class="preview-empty">这里会渲染接近博客文章页的预览，包括标题、段落、列表、代码块和图片。</p>
+                  <p class="preview-empty">这里会实时渲染接近博客文章页的预览，包括标题、段落、列表、代码块和图片。</p>
                 </div>
               </article>
             </div>
@@ -356,7 +341,7 @@
       <div class="modal-card success-card">
         <div class="success-icon-badge">🎉</div>
         <h3 class="modal-title">博文已成功发布！</h3>
-        <p class="modal-desc">你的文章已成功提交并推送到 GitHub 仓库，GitHub Pages 正在自动构建上线。</p>
+        <p class="modal-desc">文章已提交并推送到 GitHub 仓库，GitHub Pages 正在自动构建上线。</p>
         
         <div class="post-link-box">
           <span class="link-label">文章在线链接</span>
@@ -377,30 +362,27 @@
     <div class="modal-overlay" id="settings-modal" hidden>
       <div class="modal-card settings-card">
         <div class="settings-header">
-          <div class="settings-title-group">
-            <span class="eyebrow">Settings &amp; Security</span>
-            <h3 class="modal-title">发帖器设置与安全</h3>
-          </div>
+          <h3 class="modal-title">设置</h3>
           <button class="modal-close-btn" id="close-settings-modal-btn" type="button" aria-label="关闭">✕</button>
         </div>
 
         <div class="settings-body stack">
           <!-- Engine Selection -->
           <div class="settings-section">
-            <h4 class="section-subheading">运行引擎与模式</h4>
+            <label class="settings-label">发帖模式</label>
             <div class="engine-toggle-grid">
               <label class="engine-option" id="opt-local">
                 <input type="radio" name="engine_choice" value="local" checked>
                 <div class="engine-card">
-                  <div class="engine-title">🟢 本地服务模式</div>
-                  <div class="engine-desc">连接本地 Python 后台 (http://127.0.0.1:4173)，读写本地文件与 Git。</div>
+                  <div class="engine-title">🟢 本地模式</div>
+                  <div class="engine-desc">电脑本地写稿，Git 自动推送</div>
                 </div>
               </label>
               <label class="engine-option" id="opt-cloud">
                 <input type="radio" name="engine_choice" value="cloud">
                 <div class="engine-card">
-                  <div class="engine-title">☁️ GitHub API 直发 (方案 B)</div>
-                  <div class="engine-desc">手机/随时免开电脑发帖，通过 GitHub Token 直接提交到仓库。</div>
+                  <div class="engine-title">☁️ 云端直发</div>
+                  <div class="engine-desc">手机 / 网页直接提交到 GitHub</div>
                 </div>
               </label>
             </div>
@@ -408,39 +390,29 @@
 
           <!-- GitHub Token Configuration for Plan B -->
           <div class="settings-section" id="gh-token-section">
-            <h4 class="section-subheading">GitHub 管理员访问令牌 (PAT)</h4>
-            <p class="field-help">
-              用于直接向 <code>craig9re5/craig9re5.github.io</code> 提交文章。<br>
-              <strong>🔒 安全性：</strong>Token 仅保存在当前设备本地，直接与 GitHub 官方 API 通信，不经过任何中转服务器。没有 Token 的外人无任何权限。
-            </p>
-            <div class="token-input-group">
-              <input type="password" id="gh-token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
-              <button class="action-button secondary compact" id="toggle-token-visibility" type="button">👁️</button>
-            </div>
-            <div class="token-help-row">
-              <a href="https://github.com/settings/tokens/new?scopes=repo&amp;description=Craig%20Blog%20Composer%20App" target="_blank" rel="noopener noreferrer" class="text-link">
-                ↗️ 一键前往 GitHub 创建 Token (需要勾选 repo 权限)
+            <div class="section-label-row">
+              <label class="settings-label" for="gh-token-input">GitHub 访问令牌 (Token)</label>
+              <a href="https://github.com/settings/tokens/new?scopes=repo&amp;description=Craig%20Blog%20Composer" target="_blank" rel="noopener noreferrer" class="token-link">
+                获取 Token (需 repo 权限) ↗
               </a>
+            </div>
+            <div class="token-input-group">
+              <input type="password" id="gh-token-input" placeholder="输入 GitHub Token (ghp_...)" autocomplete="off">
+              <button class="action-button secondary compact icon-only" id="toggle-token-visibility" type="button" title="显示/隐藏">👁️</button>
             </div>
             <div class="token-action-row">
               <button class="action-button secondary compact" id="test-gh-token-btn" type="button">测试连接</button>
-              <button class="action-button primary compact" id="save-gh-token-btn" type="button">保存 Token</button>
-              <button class="action-button danger compact" id="logout-token-btn" type="button" title="从本机清除 Token 并锁定控制台">🔒 退出登录/清除</button>
+              <button class="action-button primary compact" id="save-gh-token-btn" type="button">保存</button>
+              <button class="action-button ghost danger compact" id="logout-token-btn" type="button" title="清除 Token 并锁定">退出登录</button>
             </div>
             <p id="token-status-msg" class="token-status-text"></p>
           </div>
 
-          <!-- Repository Meta -->
-          <div class="settings-section">
-            <h4 class="section-subheading">当前仓库信息</h4>
-            <div class="meta-row">
-              <span class="meta-name">目标仓库：</span>
-              <span class="meta-val"><code>craig9re5/craig9re5.github.io</code> (main)</span>
-            </div>
-            <div class="meta-row">
-              <span class="meta-name">博客首页：</span>
-              <a class="meta-val text-link" href="https://craig9re5.github.io" target="_blank" rel="noopener noreferrer">https://craig9re5.github.io</a>
-            </div>
+          <!-- Repository Meta (Subtle Footer) -->
+          <div class="settings-footer-info">
+            <span>仓库：<code>craig9re5.github.io</code></span>
+            <span>·</span>
+            <a class="text-link" href="https://craig9re5.github.io" target="_blank" rel="noopener noreferrer">博客首页 ↗</a>
           </div>
         </div>
       </div>
