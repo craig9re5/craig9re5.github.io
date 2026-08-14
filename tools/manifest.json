@@ -1,0 +1,18 @@
+{
+  "name": "博客发帖器 - Post Composer",
+  "short_name": "发帖器",
+  "description": "个人博客随时随地写作与快速发帖工具",
+  "start_url": "./post-composer.html",
+  "display": "standalone",
+  "background_color": "#12181a",
+  "theme_color": "#123f43",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

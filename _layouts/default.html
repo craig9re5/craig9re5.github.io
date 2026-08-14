@@ -38,7 +38,7 @@
   <body class="page-lang-{{ current_lang | slugify }}{% if is_home_page %} page-home{% else %} page-interior{% endif %}" data-page-lang="{{ current_lang }}">
     <a id="skip-to-content" href="#content">Skip to content</a>
     <script src="{{ '/assets/js/local-post-visibility.js?v=' | append: asset_version | relative_url }}"></script>
-    <header class="page-header{% if is_home_page %} page-header-home{% else %} page-header-compact{% endif %}" role="banner">
+    <header class="page-header" role="banner">
       <h1 class="project-name">{{ site.title | default: site.github.repository_name }}</h1>
       <h2 class="project-tagline" lang="{{ description_lang }}">{{ site.description | default: site.github.project_tagline }}</h2>
     </header>

@@ -815,7 +815,10 @@ class ComposerRequestHandler(SimpleHTTPRequestHandler):
 
     def has_allowed_host(self) -> bool:
         host = self.headers.get("Host", "").strip().lower()
-        return host in {f"127.0.0.1:{self.server_port}", f"localhost:{self.server_port}"}
+        if host in {f"127.0.0.1:{self.server_port}", f"localhost:{self.server_port}"}:
+            return True
+        # Support LAN access (e.g. 192.168.x.x:4173)
+        return bool(re.match(r"^(127\.0\.0\.1|localhost|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+):\d+$", host))
 
     def has_request_token(self) -> bool:
         token = self.headers.get(TOKEN_HEADER, "")
@@ -831,7 +834,7 @@ class ComposerRequestHandler(SimpleHTTPRequestHandler):
 
     def local_cors_headers(self) -> dict[str, str]:
         origin = self.headers.get("Origin", "").strip().lower()
-        if re.fullmatch(r"http://(127\.0\.0\.1|localhost):\d+", origin):
+        if re.fullmatch(r"http://(127\.0\.0\.1|localhost|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+):\d+", origin):
             return {"Access-Control-Allow-Origin": origin, "Vary": "Origin"}
         return {}
 
@@ -853,13 +856,12 @@ class ComposerRequestHandler(SimpleHTTPRequestHandler):
         self.send_header(
             "Content-Security-Policy",
             # style-src / font-src 放行 post-composer.html 通过 <link> 加载的 Google Fonts。
-            # Outfit + Newsreader 是这套界面设计好的字体，在 'self' 下会被静默拦掉，
-            # 整个工具一直跑在 Segoe UI 兜底上。内联样式仍然不放行，HTML 里不要再写 style=""。
-            "default-src 'self'; script-src 'self'; "
-            "style-src 'self' https://fonts.googleapis.com; "
+            # connect-src 放行本地与 GitHub REST API，支持云端/手机直连模式。
+            "default-src 'self'; script-src 'self' 'unsafe-inline'; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
             "font-src 'self' https://fonts.gstatic.com; "
-            "img-src 'self' data: http: https:; "
-            "connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+            "img-src 'self' data: blob: http: https:; "
+            "connect-src 'self' https://api.github.com; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
         )
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("X-Frame-Options", "DENY")
@@ -889,11 +891,28 @@ class ComposerRequestHandler(SimpleHTTPRequestHandler):
     def resolve_static_path(self, request_path: str) -> Path | None:
         normalized = posixpath.normpath(unquote(request_path))
 
-        if normalized in {".", "/"}:
+        if normalized in {".", "/", "/composer", "/composer/"}:
+            composer_index = REPO_ROOT / "composer" / "index.html"
+            if composer_index.exists():
+                return Path(self._resolve_repo_path(composer_index, REPO_ROOT))
             normalized = "/post-composer.html"
+
+        if normalized.startswith("/composer/"):
+            rel = normalized[len("/composer/"):]
+            if not rel:
+                rel = "index.html"
+            target = REPO_ROOT / "composer" / rel
+            if target.exists():
+                return Path(self._resolve_repo_path(target, REPO_ROOT))
 
         if normalized.startswith("/assets/"):
             return Path(self._resolve_repo_path(REPO_ROOT / normalized.lstrip("/"), REPO_ROOT / "assets"))
+
+        # Root static files (icons, manifest, sw)
+        for cand_dir in [TOOLS_DIR, REPO_ROOT / "composer"]:
+            cand = cand_dir / normalized.lstrip("/")
+            if cand.exists() and cand.is_file():
+                return Path(self._resolve_repo_path(cand, cand_dir))
 
         if normalized in {"/post-composer.html", "/post-composer.css", "/post-composer-app.js", "/post-composer-renderer.js", "/crypto-js.min.js"}:
             return Path(self._resolve_repo_path(TOOLS_DIR / normalized.lstrip("/"), TOOLS_DIR))

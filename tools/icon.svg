@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#18383b"/>
+      <stop offset="50%" stop-color="#122a2d"/>
+      <stop offset="100%" stop-color="#0a1819"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4ae0d0"/>
+      <stop offset="100%" stop-color="#238f83"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffd56b"/>
+      <stop offset="100%" stop-color="#e09d34"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  
+  <!-- App Icon Background with Smooth Squircle -->
+  <rect x="24" y="24" width="464" height="464" rx="108" fill="url(#bgGrad)" stroke="rgba(255,255,255,0.12)" stroke-width="6" filter="url(#shadow)"/>
+  
+  <!-- Subtle Glow -->
+  <circle cx="256" cy="180" r="140" fill="url(#accentGrad)" opacity="0.12" filter="blur(30px)"/>
+  
+  <!-- Document & Feather Quill / Spark Illustration -->
+  <g transform="translate(116, 100)">
+    <!-- Document Card -->
+    <rect x="10" y="24" width="220" height="280" rx="20" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.18)" stroke-width="4"/>
+    <!-- Document lines -->
+    <rect x="42" y="70" width="110" height="12" rx="6" fill="url(#accentGrad)"/>
+    <rect x="42" y="110" width="156" height="8" rx="4" fill="rgba(255,255,255,0.3)"/>
+    <rect x="42" y="136" width="140" height="8" rx="4" fill="rgba(255,255,255,0.2)"/>
+    <rect x="42" y="162" width="156" height="8" rx="4" fill="rgba(255,255,255,0.2)"/>
+    <rect x="42" y="188" width="90" height="8" rx="4" fill="rgba(255,255,255,0.2)"/>
+
+    <!-- Floating Rocket / Quill Pen -->
+    <g transform="translate(140, 140) rotate(-35)">
+      <!-- Rocket Body -->
+      <path d="M40 0 C70 30, 80 80, 80 110 L10 110 C10 80, 20 30, 50 0 Z" fill="url(#goldGrad)" />
+      <!-- Wing Left -->
+      <path d="M10 80 L-15 110 L10 110 Z" fill="#c47820"/>
+      <!-- Wing Right -->
+      <path d="M80 80 L105 110 L80 110 Z" fill="#c47820"/>
+      <!-- Window -->
+      <circle cx="45" cy="65" r="14" fill="#122a2d" stroke="#fff" stroke-width="3"/>
+      <!-- Flame -->
+      <path d="M25 115 Q45 150 45 150 Q45 150 65 115 Z" fill="#ff5722"/>
+      <path d="M35 115 Q45 135 45 135 Q45 135 55 115 Z" fill="#ffeb3b"/>
+    </g>
+  </g>
+</svg>
