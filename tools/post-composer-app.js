@@ -51,15 +51,19 @@ const ENCRYPTED_SIG = "::ENCRYPTED::";
 const insertLocalImageButton = document.querySelector("#insert-local-image");
 const toolbarButtons = document.querySelectorAll("[data-action]");
 
-// Modals and Mobile controls
+// Modals, Security Gate and Mobile controls
 const openSettingsBtn = document.querySelector("#open-settings-btn");
-const cloudPromptBanner = document.querySelector("#cloud-prompt-banner");
-const bannerSettingsBtn = document.querySelector("#banner-settings-btn");
+const authGateScreen = document.querySelector("#auth-gate-screen");
+const gateTokenInput = document.querySelector("#gate-token-input");
+const gateToggleTokenBtn = document.querySelector("#gate-toggle-token-btn");
+const gateUnlockBtn = document.querySelector("#gate-unlock-btn");
+const gateStatusMsg = document.querySelector("#gate-status-msg");
 const settingsModal = document.querySelector("#settings-modal");
 const closeSettingsModalBtn = document.querySelector("#close-settings-modal-btn");
 const ghTokenInput = document.querySelector("#gh-token-input");
 const saveGhTokenBtn = document.querySelector("#save-gh-token-btn");
 const testGhTokenBtn = document.querySelector("#test-gh-token-btn");
+const logoutTokenBtn = document.querySelector("#logout-token-btn");
 const tokenStatusMsg = document.querySelector("#token-status-msg");
 const toggleTokenVisibilityBtn = document.querySelector("#toggle-token-visibility");
 const radioLocal = document.querySelector("input[name='engine_choice'][value='local']");
@@ -319,28 +323,38 @@ function updateEngineDisplay() {
   if (!engineChip || !engineLabel) return;
   engineChip.classList.remove("cloud", "error");
 
+  const isLocalHost = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+
   if (state.engine === ENGINE_LOCAL) {
+    if (authGateScreen) authGateScreen.hidden = true;
+    if (composerLayout) composerLayout.hidden = false;
+
     if (state.serviceReady) {
       engineLabel.textContent = "🟢 本地服务";
-      engineChip.title = "已连接本地服务 (127.0.0.1:4173)。点击可切换或配置。";
-      if (cloudPromptBanner) cloudPromptBanner.hidden = true;
+      engineChip.title = "已连接本地后台服务 (127.0.0.1:4173)。点击可查看设置。";
     } else {
       engineChip.classList.add("error");
-      engineLabel.textContent = "🔴 本地离线";
+      engineLabel.textContent = isLocalHost ? "🔴 本地离线" : "☁️ 云端直发";
       engineChip.title = "本地服务未连接。点击可切换到 GitHub 云端直发模式。";
-      if (cloudPromptBanner) cloudPromptBanner.hidden = false;
+      if (!isLocalHost) {
+        state.engine = ENGINE_CLOUD;
+        updateEngineDisplay();
+        return;
+      }
     }
     if (radioLocal) radioLocal.checked = true;
   } else {
     engineChip.classList.add("cloud");
     if (state.githubToken) {
       engineLabel.textContent = "☁️ GitHub 直发";
-      engineChip.title = "GitHub API 直连模式 (已配置 Token)。点击可查看详情。";
-      if (cloudPromptBanner) cloudPromptBanner.hidden = true;
+      engineChip.title = "已配置 GitHub 访问令牌，点击可查看设置。";
+      if (authGateScreen) authGateScreen.hidden = true;
+      if (composerLayout) composerLayout.hidden = false;
     } else {
-      engineLabel.textContent = "☁️ 待配置 Token";
-      engineChip.title = "请点击填入 GitHub Token 以启用手机/云端发帖。";
-      if (cloudPromptBanner) cloudPromptBanner.hidden = false;
+      engineLabel.textContent = "🔒 需管理员验证";
+      engineChip.title = "未配置 GitHub Token，控制台处于受保护锁定状态。";
+      if (authGateScreen) authGateScreen.hidden = false;
+      if (composerLayout) composerLayout.hidden = true;
     }
     if (radioCloud) radioCloud.checked = true;
   }
@@ -533,16 +547,25 @@ function clearDraftByKey(key) {
 }
 
 let previewDebounceTimer = null;
+let draftPersistTimer = null;
+
 function schedulePreview() {
   clearTimeout(previewDebounceTimer);
   previewDebounceTimer = setTimeout(() => {
-    renderPreview();
+    requestAnimationFrame(() => {
+      renderPreview();
+    });
+  }, 160);
+
+  clearTimeout(draftPersistTimer);
+  draftPersistTimer = setTimeout(() => {
     persistCurrentDraft();
-  }, 120);
+  }, 800);
 }
 
 function flushPendingWork() {
   clearTimeout(previewDebounceTimer);
+  clearTimeout(draftPersistTimer);
   persistCurrentDraft();
 }
 
@@ -1033,17 +1056,18 @@ function closeSettingsModal() {
   if (settingsModal) settingsModal.hidden = true;
 }
 
-async function testGitHubToken(token) {
+async function testGitHubToken(token, statusTarget) {
+  const target = statusTarget || tokenStatusMsg;
   if (!token) {
-    if (tokenStatusMsg) {
-      tokenStatusMsg.textContent = "Token 不能为空";
-      tokenStatusMsg.className = "token-status-text error";
+    if (target) {
+      target.textContent = "Token 不能为空";
+      target.className = "token-status-text error";
     }
     return false;
   }
-  if (tokenStatusMsg) {
-    tokenStatusMsg.textContent = "正在测试连接 GitHub...";
-    tokenStatusMsg.className = "token-status-text";
+  if (target) {
+    target.textContent = "正在测试连接 GitHub...";
+    target.className = "token-status-text";
   }
 
   const { response, data } = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}`, {
@@ -1054,15 +1078,15 @@ async function testGitHubToken(token) {
   }).then(async (r) => ({ response: r, data: await r.json().catch(() => ({})) })).catch((err) => ({ response: { ok: false }, data: { message: err.message } }));
 
   if (response.ok) {
-    if (tokenStatusMsg) {
-      tokenStatusMsg.textContent = `✅ 连接成功！已验证仓库: ${data.full_name}`;
-      tokenStatusMsg.className = "token-status-text success";
+    if (target) {
+      target.textContent = `✅ 验证成功！已连接仓库: ${data.full_name}`;
+      target.className = "token-status-text success";
     }
     return true;
   } else {
-    if (tokenStatusMsg) {
-      tokenStatusMsg.textContent = `❌ 验证失败: ${data.message || "未知错误"}`;
-      tokenStatusMsg.className = "token-status-text error";
+    if (target) {
+      target.textContent = `❌ 验证失败: ${data.message || "Token 无效或权限不足"}`;
+      target.className = "token-status-text error";
     }
     return false;
   }
@@ -1303,9 +1327,41 @@ function initEventListeners() {
     });
   }
 
+  // Security Gate
+  gateToggleTokenBtn?.addEventListener("click", () => {
+    gateTokenInput.type = gateTokenInput.type === "password" ? "text" : "password";
+  });
+
+  const performGateUnlock = async () => {
+    const token = gateTokenInput.value.trim();
+    if (!token) {
+      if (gateStatusMsg) {
+        gateStatusMsg.textContent = "请输入 GitHub Token";
+        gateStatusMsg.className = "auth-status-text error";
+      }
+      return;
+    }
+    const ok = await testGitHubToken(token, gateStatusMsg);
+    if (ok) {
+      state.githubToken = token;
+      localStorage.setItem(GH_TOKEN_KEY, token);
+      state.engine = ENGINE_CLOUD;
+      localStorage.setItem(ENGINE_STORAGE_KEY, ENGINE_CLOUD);
+      updateEngineDisplay();
+      await loadPostsIndex();
+    }
+  };
+
+  gateUnlockBtn?.addEventListener("click", performGateUnlock);
+  gateTokenInput?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      performGateUnlock();
+    }
+  });
+
   // Modals
   openSettingsBtn?.addEventListener("click", openSettingsModal);
-  bannerSettingsBtn?.addEventListener("click", openSettingsModal);
   engineChip?.addEventListener("click", openSettingsModal);
   closeSettingsModalBtn?.addEventListener("click", closeSettingsModal);
   settingsModal?.addEventListener("click", (e) => {
@@ -1339,6 +1395,17 @@ function initEventListeners() {
 
   testGhTokenBtn?.addEventListener("click", () => {
     testGitHubToken(ghTokenInput.value.trim());
+  });
+
+  logoutTokenBtn?.addEventListener("click", () => {
+    if (confirm("确定要从本机清除 GitHub Token 并锁定控制台吗？")) {
+      state.githubToken = "";
+      localStorage.removeItem(GH_TOKEN_KEY);
+      if (ghTokenInput) ghTokenInput.value = "";
+      if (gateTokenInput) gateTokenInput.value = "";
+      closeSettingsModal();
+      updateEngineDisplay();
+    }
   });
 
   toggleTokenVisibilityBtn?.addEventListener("click", () => {

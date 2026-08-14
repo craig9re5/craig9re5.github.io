@@ -205,25 +205,17 @@ select {
   gap: 16px;
 }
 
-.masthead {
+.masthead,
+header.masthead,
+.panel.masthead {
   margin-bottom: 18px;
   overflow: hidden;
-  background:
-    radial-gradient(circle at top left, rgba(255, 255, 255, 0.15), transparent 30%),
-    radial-gradient(circle at bottom right, rgba(240, 195, 106, 0.14), transparent 24%),
-    linear-gradient(135deg, #0f3538 0%, #164f4c 48%, #1f6b63 100%);
-  color: #ffffff;
-}
-
-.masthead::before {
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 44%, transparent 76%);
-  border-color: rgba(255, 255, 255, 0.18);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    inset 0 -1px 0 rgba(18, 63, 67, 0.12);
+  background: linear-gradient(135deg, #0d2c2f 0%, #123f43 45%, #1f6b63 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow);
+  position: relative;
 }
 
 .masthead-inner {
@@ -241,7 +233,7 @@ select {
 }
 
 .masthead .eyebrow {
-  color: rgba(255, 255, 255, 0.82);
+  color: rgba(255, 255, 255, 0.82) !important;
   font-size: 0.76rem;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -264,6 +256,108 @@ select {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+/* Security Gate / Lock Screen */
+.auth-gate-card {
+  max-width: 660px;
+  margin: 40px auto 60px;
+  padding: 40px 36px;
+  background: var(--surface-strong);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.auth-gate-card[hidden] {
+  display: none !important;
+}
+
+.auth-gate-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+}
+
+.auth-icon-badge {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.auth-title {
+  margin: 0;
+  font-family: var(--display-font);
+  font-size: 1.85rem;
+  color: var(--accent-deep);
+  line-height: 1.2;
+}
+
+[data-theme="dark"] .auth-title {
+  color: var(--accent);
+}
+
+.auth-desc {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  max-width: 520px;
+}
+
+.auth-form-box {
+  width: 100%;
+  max-width: 500px;
+  margin-top: 12px;
+  text-align: left;
+}
+
+.auth-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.auth-status-text {
+  font-size: 0.9rem;
+  margin: 6px 0 0;
+  min-height: 1.3rem;
+  text-align: center;
+}
+.auth-status-text.error { color: var(--danger); }
+.auth-status-text.success { color: #10b981; }
+
+.auth-security-notes {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+.sec-note-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.45;
 }
 
 /* High Contrast Masthead Action Buttons */
@@ -1637,171 +1731,37 @@ textarea {
    正文和预览各自独立滚动，动作栏永远在视野里。
    ============================================================ */
 @media (min-width: 1201px) and (min-height: 640px) {
-  html,
-  body {
-    height: 100%;
-  }
-
-  body {
-    overflow: hidden;
-  }
-
+@media (min-width: 1024px) {
   .shell {
-    height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    padding: 16px 18px 18px;
-  }
-
-  /* 顶栏在 768px 高的屏幕上原本要吃掉 135px，压扁它 */
-  .masthead {
-    flex: 0 0 auto;
-    margin-bottom: 0;
-  }
-
-  .masthead-inner {
-    padding: 14px 24px 16px;
-  }
-
-  .masthead h1 {
-    font-size: 1.3rem;
-    margin: 0;
+    padding: 24px 28px 40px;
   }
 
   .layout {
-    flex: 1 1 auto;
-    min-height: 0;
-    align-items: stretch;
+    align-items: start;
   }
 
-  /* 侧栏改为撑满列高、列表内部滚动 */
   .library-panel {
-    position: static;
-    max-height: none;
-    height: 100%;
-    flex-direction: column;
+    position: sticky;
+    top: 20px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
   }
 
-  .library-rail {
-    min-height: 0;
-    flex: 0 0 auto;
-  }
-
-  .layout.library-expanded .library-panel {
-    overflow: hidden;
-  }
-
-  .layout.library-expanded .library-content {
-    min-height: 0;
-  }
-
-  .post-library-list {
-    max-height: none;
-    flex: 1 1 auto;
-    min-height: 0;
-  }
-
-  .content-split {
-    min-height: 0;
-    align-items: stretch;
-  }
-
-  .composer-main {
-    min-height: 0;
-    display: flex;
-  }
-
-  .composer-workspace {
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  /* 编辑卡片由 grid 改成纵向 flex，好让正文区吃掉剩余空间 */
-  .editor-card {
-    flex: 1 1 auto;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-
-  /* 用子选择器提高特异度，否则会被下面的 .editor-card > * 覆盖成不可伸缩 */
-  .editor-card > .editor-container {
-    flex: 1 1 auto;
-    min-height: 160px;
+  .preview-panel {
+    position: sticky;
+    top: 20px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
   }
 
   .editor-area {
-    flex: 1 1 auto;
-    min-height: 0;
-    height: 100%;
-    resize: none;
-    overflow-y: auto;
+    min-height: 480px;
+    resize: vertical;
   }
 
-  /* flex 子项默认可收缩，不锁住的话 <details> 会被正文区压成 1px */
-  .editor-card > * {
-    flex: 0 0 auto;
-  }
-
-  .helper-drawer {
-    flex: 0 0 auto;
-  }
-
-  .editor-card .section-kicker {
-    display: none;
-  }
-
-  /* 竖向空间在这个模式下很贵，把非写作区的一切都压紧一档 */
-  .editor-card {
-    padding: 16px 18px;
-  }
-
-  .title-input {
-    font-size: 1.3rem;
-  }
-
-  .drawer-card summary {
-    padding: 10px 14px;
-  }
-
-  .toolbar-shell {
-    padding: 7px 12px;
-  }
-
-  /* 14 个按钮在 36px 时总宽 661px，超过编辑列的 550px 会折成两行，
-     直接吃掉一半正文高度。缩到 30px 正好排成一行。 */
   .toolbar {
-    gap: 7px;
-    flex-wrap: nowrap;
-  }
-
-  .toolbar-group {
-    flex-wrap: nowrap;
-    gap: 5px;
-    padding-right: 7px;
-  }
-
-  /* 只缩 Markdown 工具栏里的按钮，别把顶栏的主题切换按钮一起缩了 */
-  .toolbar .tool-button {
-    width: 30px;
-    height: 30px;
-  }
-
-  .toolbar .tool-button svg {
-    width: 15px;
-    height: 15px;
-  }
-
-  /* 预览撑满整列并独立滚动，不再是 296px 的一条 */
-  .preview-panel {
-    position: static;
-    max-height: none;
-    height: 100%;
-    overflow-y: auto;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 }
 

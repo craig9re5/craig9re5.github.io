@@ -9,7 +9,7 @@
     <link rel="manifest" href="./manifest.json">
     <link rel="icon" type="image/svg+xml" href="./icon.svg">
     <link rel="apple-touch-icon" href="./icon.svg">
-    <meta name="theme-color" content="#12181a">
+    <meta name="theme-color" content="#0d2c2f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -23,7 +23,8 @@
   </head>
   <body>
     <div class="shell">
-      <header class="panel masthead">
+      <!-- App Header -->
+      <header class="masthead" id="app-masthead">
         <div class="masthead-inner">
           <div class="masthead-brand">
             <p class="eyebrow">Craig's Blog</p>
@@ -44,10 +45,10 @@
             </button>
             
             <!-- Prominent Settings Button with Text & Icon -->
-            <button class="masthead-btn" id="open-settings-btn" type="button" title="设置与 GitHub Token 配置">
+            <button class="masthead-btn" id="open-settings-btn" type="button" title="设置与安全权限配置">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="3"></circle>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
               </svg>
               <span>设置</span>
             </button>
@@ -64,6 +65,49 @@
         </div>
       </header>
 
+      <!-- Security Gate / Lock Screen (Shown when in Web Cloud mode without Token) -->
+      <section class="auth-gate-card panel" id="auth-gate-screen" hidden>
+        <div class="auth-gate-inner">
+          <div class="auth-icon-badge">🔒</div>
+          <h2 class="auth-title">博主管理权限验证</h2>
+          <p class="auth-desc">
+            本控制台直接接入 GitHub 底层仓库。<strong>未授权访客无任何读写或发布权限</strong>。<br>
+            请输入你的 GitHub Personal Access Token (PAT) 验证管理员身份以解锁发帖器。
+          </p>
+
+          <div class="auth-form-box stack">
+            <div class="token-input-group">
+              <input type="password" id="gate-token-input" placeholder="输入 GitHub Personal Access Token (ghp_...)" autocomplete="off">
+              <button class="action-button secondary compact" id="gate-toggle-token-btn" type="button">👁️</button>
+            </div>
+            
+            <div class="auth-actions-row">
+              <a href="https://github.com/settings/tokens/new?scopes=repo&amp;description=Craig%20Blog%20Composer" target="_blank" rel="noopener noreferrer" class="text-link">
+                ↗️ 在 GitHub 创建 Token (勾选 repo 权限)
+              </a>
+              <button class="action-button primary" id="gate-unlock-btn" type="button">
+                <span class="btn-icon">🔓</span>
+                <span class="btn-text">验证并解锁控制台</span>
+              </button>
+            </div>
+
+            <p id="gate-status-msg" class="auth-status-text"></p>
+          </div>
+
+          <div class="auth-security-notes">
+            <div class="sec-note-item">
+              <span class="sec-icon">🛡️</span>
+              <span><strong>绝对安全保证</strong>：Token 仅加密缓存在你当前设备的本地浏览器中，绝不上报任何第三方服务器。</span>
+            </div>
+            <div class="sec-note-item">
+              <span class="sec-icon">🚫</span>
+              <span><strong>零权限保护</strong>：任何未经授权的外来访问者均无法通过 GitHub API 修改或发布任何博文。</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main App Layout (Visible after authentication or in local mode) -->
       <div class="layout" id="composer-layout">
         <!-- Sidebar: Article Library -->
         <aside class="panel library-panel" id="library-panel">
@@ -101,16 +145,6 @@
         <!-- Main Content & Preview Area -->
         <div class="content-split">
           <main class="composer-main" id="view-writer">
-            <!-- Cloud Mode Prompt Banner (Shown if in cloud mode without token) -->
-            <div class="cloud-prompt-banner" id="cloud-prompt-banner" hidden>
-              <div class="banner-icon">☁️</div>
-              <div class="banner-text">
-                <strong>已启用云端/手机直发模式 (方案 B)</strong>
-                <span>点击右侧按钮填入 GitHub Token，即可随时随地在手机或电脑写文拍照并直接发布。</span>
-              </div>
-              <button class="action-button primary compact" id="banner-settings-btn" type="button">⚙️ 配置 GitHub Token</button>
-            </div>
-
             <section class="panel composer-workspace">
               <section class="editor-card stack">
                 <div class="section-heading composer-titlebar">
@@ -201,47 +235,47 @@
                           </svg>
                         </button>
                         <button class="tool-button" data-action="link" type="button" title="插入链接 (Ctrl+K)">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
                           </svg>
                         </button>
                         <button class="tool-button" data-action="inline-code" type="button" title="行内代码">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" />
                           </svg>
                         </button>
                       </div>
                       <div class="toolbar-group">
                         <button class="tool-button" data-action="quote" type="button" title="引用块">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M3 3v18" stroke-width="3" /><path d="M9 5h12" /><path d="M9 12h12" /><path d="M9 19h12" />
                           </svg>
                         </button>
                         <button class="tool-button" data-action="ul" type="button" title="无序列表">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" />
                             <line x1="3" y1="6" x2="3.01" y2="6" stroke-width="3" /><line x1="3" y1="12" x2="3.01" y2="12" stroke-width="3" /><line x1="3" y1="18" x2="3.01" y2="18" stroke-width="3" />
                           </svg>
                         </button>
                         <button class="tool-button" data-action="task" type="button" title="任务列表">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="4" width="7" height="7" rx="1.5" /><path d="M3 19l2 2 4-4" /><line x1="14" y1="7" x2="21" y2="7" /><line x1="14" y1="17" x2="21" y2="17" />
                           </svg>
                         </button>
                       </div>
                       <div class="toolbar-group">
                         <button class="tool-button" data-action="code-block" type="button" title="代码块">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="2" y="4" width="20" height="16" rx="2" /><path d="M6 8l3 3-3 3" /><line x1="11" y1="14" x2="15" y2="14" />
                           </svg>
                         </button>
                         <button class="tool-button" id="insert-local-image" type="button" title="插入图片（支持直接 Ctrl+V 粘贴截图或拖拽图片）">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /><path d="M17 5v6M14 8h6" />
                           </svg>
                         </button>
                         <button class="tool-button mobile-only-btn" id="mobile-camera-btn" type="button" title="拍照直接插入插图">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
                             <circle cx="12" cy="13" r="4"></circle>
                           </svg>
@@ -344,8 +378,8 @@
       <div class="modal-card settings-card">
         <div class="settings-header">
           <div class="settings-title-group">
-            <span class="eyebrow">Settings &amp; Cloud Posting</span>
-            <h3 class="modal-title">发帖器设置</h3>
+            <span class="eyebrow">Settings &amp; Security</span>
+            <h3 class="modal-title">发帖器设置与安全</h3>
           </div>
           <button class="modal-close-btn" id="close-settings-modal-btn" type="button" aria-label="关闭">✕</button>
         </div>
@@ -374,10 +408,10 @@
 
           <!-- GitHub Token Configuration for Plan B -->
           <div class="settings-section" id="gh-token-section">
-            <h4 class="section-subheading">GitHub 访问令牌 (Personal Access Token)</h4>
+            <h4 class="section-subheading">GitHub 管理员访问令牌 (PAT)</h4>
             <p class="field-help">
-              用于在手机或电脑关机时直接向 <code>craig9re5/craig9re5.github.io</code> 发帖。<br>
-              <strong>安全性：</strong>Token 仅保存在你的设备本地，直接与 GitHub 官方 API 通信，不经过任何第三方服务器。
+              用于直接向 <code>craig9re5/craig9re5.github.io</code> 提交文章。<br>
+              <strong>🔒 安全性：</strong>Token 仅保存在当前设备本地，直接与 GitHub 官方 API 通信，不经过任何中转服务器。没有 Token 的外人无任何权限。
             </p>
             <div class="token-input-group">
               <input type="password" id="gh-token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
@@ -391,6 +425,7 @@
             <div class="token-action-row">
               <button class="action-button secondary compact" id="test-gh-token-btn" type="button">测试连接</button>
               <button class="action-button primary compact" id="save-gh-token-btn" type="button">保存 Token</button>
+              <button class="action-button danger compact" id="logout-token-btn" type="button" title="从本机清除 Token 并锁定控制台">🔒 退出登录/清除</button>
             </div>
             <p id="token-status-msg" class="token-status-text"></p>
           </div>
