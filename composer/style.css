@@ -49,26 +49,9 @@
   --tag-suggestion-bg: rgba(21, 36, 37, 0.88);
 }
 
-[data-theme="dark"] .panel::before {
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.015) 52%, rgba(0, 0, 0, 0.14) 100%),
-    rgba(13, 26, 27, 0.64);
-  border-color: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px) saturate(135%);
-  -webkit-backdrop-filter: blur(20px) saturate(135%);
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    inset 0 10px 18px rgba(255, 255, 255, 0.025),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.32);
-}
-
-[data-theme="dark"] .panel::after {
-  background: radial-gradient(
-    circle 320px at var(--mouse-x, -999px) var(--mouse-y, -999px),
-    rgba(255, 255, 255, 0.05) 0%,
-    rgba(255, 255, 255, 0.01) 50%,
-    transparent 80%
-  );
+[data-theme="dark"] .panel {
+  background: var(--surface-strong);
+  border-color: var(--line);
 }
 
 [data-theme="dark"] body {
@@ -98,15 +81,7 @@
     radial-gradient(circle at top left, rgba(255, 255, 255, 0.08), transparent 30%),
     radial-gradient(circle at bottom right, rgba(209, 154, 67, 0.06), transparent 24%),
     linear-gradient(135deg, #092123 0%, #123f43 48%, #1f6b63 100%);
-}
-
-[data-theme="dark"] .masthead::before {
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.018) 42%, transparent 78%);
   border-color: rgba(255, 255, 255, 0.12);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.24);
 }
 
 [data-theme="dark"] .preview-body code {
@@ -219,60 +194,10 @@ select {
 
 .panel {
   position: relative;
-  background: transparent;
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow);
-  overflow: hidden;
-  isolation: isolate;
-}
-
-/* Contained glass background plate */
-.panel::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  border-radius: var(--radius-xl);
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.055) 48%, rgba(255, 255, 255, 0) 100%),
-    rgba(255, 253, 248, 0.42);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(20px) saturate(145%);
-  -webkit-backdrop-filter: blur(20px) saturate(145%);
-  pointer-events: none;
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.36),
-    inset 0 12px 22px rgba(255, 255, 255, 0.06),
-    inset 0 -1px 0 rgba(24, 50, 51, 0.08);
-}
-
-/* Mouse-tracking spotlight glare layer */
-.panel::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  border-radius: var(--radius-xl);
-  background:
-    radial-gradient(
-      circle 320px at var(--mouse-x, -999px) var(--mouse-y, -999px),
-      rgba(255, 255, 255, 0.12) 0%,
-      rgba(255, 255, 255, 0.035) 42%,
-      transparent 78%
-    ),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.12), transparent 34%);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.panel > * {
-  position: relative;
-  z-index: 1;
-}
-
-.panel:hover::after {
-  opacity: 1;
 }
 
 .stack {
