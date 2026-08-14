@@ -11,9 +11,11 @@ layout: default
 {% assign char_count = clean_content | size %}
 {% if current_lang == 'zh-Hans' or current_lang == 'zh' or current_lang == 'ja' %}
   {% assign est_minutes = char_count | divided_by: 350 | at_least: 1 %}
+  {% assign count_stat = char_count | append: " 字" %}
   {% assign reading_stat = est_minutes | append: " 分钟阅读" %}
 {% else %}
   {% assign est_minutes = word_count | divided_by: 200 | at_least: 1 %}
+  {% assign count_stat = word_count | append: " words" %}
   {% assign reading_stat = est_minutes | append: " min read" %}
 {% endif %}
 
@@ -24,6 +26,8 @@ layout: default
         <div class="post-header-meta">
             <time class="post-date" datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %-d, %Y" }}</time>
             {% unless page.encrypted %}
+            <span class="meta-sep" aria-hidden="true">&bull;</span>
+            <span class="post-word-count">{{ count_stat }}</span>
             <span class="meta-sep" aria-hidden="true">&bull;</span>
             <span class="post-reading-time">{{ reading_stat }}</span>
             {% endunless %}
