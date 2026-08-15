@@ -18,323 +18,381 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&amp;family=Newsreader:ital,opsz,wght@0,6..72,300..800;1,6..72,300..800&amp;family=Noto+Sans+SC:wght@400;500;700&amp;family=Noto+Serif+JP:wght@500;700&amp;family=Noto+Serif+SC:wght@400;500;700&amp;display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&amp;family=Newsreader:ital,opsz,wght@0,6..72,300..800;1,6..72,300..800&amp;family=Noto+Sans+SC:wght@400;500;700&amp;family=Noto+Serif+JP:wght@500;700&amp;family=Noto+Serif+SC:wght@400;500;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
     <link rel="stylesheet" href="./style.css">
   </head>
   <body>
-    <div class="shell">
-      <!-- App Header -->
-      <header class="masthead" id="app-masthead">
-        <div class="masthead-inner">
-          <div class="masthead-brand">
-            <h1 class="masthead-title">发帖器</h1>
-          </div>
+    <!-- Top Action Bar (Masthead) -->
+    <header class="app-masthead" id="app-masthead">
+      <div class="masthead-left">
+        <h1 class="brand-title">发帖器</h1>
+        
+        <!-- Library Drawer Trigger Button -->
+        <button class="topbar-btn" id="open-library-btn" type="button" title="打开文章库">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+          <span class="btn-text">文库</span>
+          <span class="library-badge-count" id="library-badge-count">0</span>
+        </button>
 
-          <!-- Mobile View Segmented Switcher (Visible on mobile screens) -->
-          <div class="mobile-segmented-control" id="mobile-view-tabs" role="tablist" aria-label="移动端视图切换">
-            <button class="tab-btn active" id="tab-write" type="button" role="tab" aria-selected="true">✏️ 写作</button>
-            <button class="tab-btn" id="tab-preview" type="button" role="tab" aria-selected="false">👁️ 预览</button>
-          </div>
+        <!-- Engine Status Chip (Clickable for Settings) -->
+        <button class="mode-chip" id="engine-chip" type="button" title="点击查看或切换运行模式">
+          <span class="engine-indicator-dot"></span>
+          <span id="engine-label">正在连接...</span>
+        </button>
+      </div>
 
-          <div class="masthead-status">
-            <!-- Engine Mode Chip (Clickable for settings) -->
-            <button class="mode-chip" id="engine-chip" type="button" title="点击切换运行模式">
-              <span class="engine-indicator-dot"></span>
-              <span id="engine-label">正在连接...</span>
-            </button>
-            
-            <!-- Settings Button -->
-            <button class="masthead-btn" id="open-settings-btn" type="button" title="设置">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="3"></circle>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-              </svg>
-              <span>设置</span>
-            </button>
+      <!-- Mobile View Segmented Switcher (Visible on mobile screens) -->
+      <div class="mobile-segmented-control" id="mobile-view-tabs" role="tablist" aria-label="移动端视图切换">
+        <button class="tab-btn active" id="tab-write" type="button" role="tab" aria-selected="true">✏️ 写作</button>
+        <button class="tab-btn" id="tab-preview" type="button" role="tab" aria-selected="false">👁️ 预览</button>
+      </div>
 
-            <!-- Theme Toggle -->
-            <button class="masthead-btn icon-only theme-toggle-btn" id="theme-toggle" type="button" title="切换深色/浅色模式">
-              <svg id="theme-toggle-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                <path d="M12.3 22h-.1c-5.5 0-10-4.5-10-10 0-4.8 3.5-8.9 8.2-9.8.6-.1 1.2.3 1.3.9.1.6-.2 1.2-.8 1.4-2.8 1-4.7 3.5-4.7 6.5 0 3.9 3.1 7 7 7 3 0 5.5-1.9 6.5-4.7.2-.6.8-.9 1.4-.8.6.1 1 .7.9 1.3-.9 4.7-5 8.2-9.7 8.2z"/>
-              </svg>
-            </button>
-            <div class="status-chip" id="connection-chip" hidden></div>
-            <span id="connection-copy" hidden></span>
-          </div>
+      <div class="masthead-right">
+        <!-- Save Draft Button -->
+        <button class="topbar-btn secondary" id="save-draft-btn" type="button" title="保存草稿 (Ctrl+S)">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+            <polyline points="7 3 7 8 15 8"></polyline>
+          </svg>
+          <span class="btn-text">存草稿</span>
+        </button>
+
+        <!-- Primary Highlight: Publish Button -->
+        <button class="topbar-btn publish-btn" id="save-publish-post" type="button" title="发布到博客 (Ctrl+Enter)">
+          <span class="btn-icon">🚀</span>
+          <span class="btn-text">发布到博客</span>
+        </button>
+
+        <!-- Settings Button -->
+        <button class="topbar-btn icon-only" id="open-settings-btn" type="button" title="设置">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+
+        <!-- Theme Toggle -->
+        <button class="topbar-btn icon-only theme-toggle-btn" id="theme-toggle" type="button" title="切换浅色/深色模式">
+          <svg id="theme-toggle-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M12.3 22h-.1c-5.5 0-10-4.5-10-10 0-4.8 3.5-8.9 8.2-9.8.6-.1 1.2.3 1.3.9.1.6-.2 1.2-.8 1.4-2.8 1-4.7 3.5-4.7 6.5 0 3.9 3.1 7 7 7 3 0 5.5-1.9 6.5-4.7.2-.6.8-.9 1.4-.8.6.1 1 .7.9 1.3-.9 4.7-5 8.2-9.7 8.2z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Hidden compatibility elements -->
+    <div id="connection-chip" hidden></div>
+    <span id="connection-copy" hidden></span>
+    <button id="toggle-library" class="hidden" type="button"></button>
+    <span id="library-toggle-label" class="hidden"></span>
+    <span id="library-current-meta" class="hidden"></span>
+
+    <!-- Off-Canvas Slide Drawer: Article Library -->
+    <div class="drawer-backdrop" id="library-backdrop" hidden></div>
+    <aside class="library-slide-drawer" id="library-drawer" aria-label="文章库抽屉" hidden>
+      <div class="drawer-header">
+        <div class="drawer-title-row">
+          <h2 class="drawer-title">文章库</h2>
+          <button class="action-button primary compact" id="new-post" type="button" title="新建文章">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>新建文章</span>
+          </button>
         </div>
-      </header>
+        <button class="drawer-close-btn" id="close-library-btn" type="button" aria-label="关闭文库">✕</button>
+      </div>
 
-      <!-- Security Gate / Lock Screen (Shown when in Web Cloud mode without Token) -->
-      <section class="auth-gate-card panel" id="auth-gate-screen" hidden>
-        <div class="auth-gate-inner">
-          <div class="auth-icon-badge">🔒</div>
-          <h2 class="auth-title">发帖器权限验证</h2>
-          <p class="auth-desc">
-            请输入你的 GitHub 访问令牌 (Token) 以解锁发帖控制台。
-          </p>
+      <div class="drawer-search-row">
+        <div class="search-input-wrap">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input id="post-search" name="post-search" type="text" placeholder="搜索标题、文件名或标签...">
+        </div>
+      </div>
 
-          <div class="auth-form-box stack">
-            <div class="token-input-group">
-              <input type="password" id="gate-token-input" placeholder="输入 GitHub Token (ghp_...)" autocomplete="off">
-              <button class="action-button secondary compact icon-only" id="gate-toggle-token-btn" type="button" title="显示/隐藏">👁️</button>
+      <div class="post-library-list" id="post-list" aria-live="polite"></div>
+    </aside>
+
+    <!-- Security Gate / Lock Screen (Shown when in Web Cloud mode without Token) -->
+    <section class="auth-gate-card" id="auth-gate-screen" hidden>
+      <div class="auth-gate-inner">
+        <div class="auth-icon-badge">🔒</div>
+        <h2 class="auth-title">发帖器权限验证</h2>
+        <p class="auth-desc">
+          请输入你的 GitHub 访问令牌 (Token) 以解锁发帖控制台。
+        </p>
+
+        <div class="auth-form-box stack">
+          <div class="token-input-group">
+            <input type="password" id="gate-token-input" placeholder="输入 GitHub Token (ghp_...)" autocomplete="off">
+            <button class="action-button secondary compact icon-only" id="gate-toggle-token-btn" type="button" title="显示/隐藏">👁️</button>
+          </div>
+          
+          <div class="auth-actions-row">
+            <a href="https://github.com/settings/tokens/new?scopes=repo&amp;description=Craig%20Blog%20Composer" target="_blank" rel="noopener noreferrer" class="token-link">
+              获取 Token (需 repo 权限) ↗
+            </a>
+            <button class="action-button primary" id="gate-unlock-btn" type="button">
+              <span class="btn-icon">🔓</span>
+              <span class="btn-text">验证并解锁</span>
+            </button>
+          </div>
+
+          <p id="gate-status-msg" class="auth-status-text"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Workspace (Dual-Pane Desktop / Fluid Mobile Canvas) -->
+    <main class="app-workspace" id="composer-layout">
+      <!-- Left Column: Immersive Writing Canvas -->
+      <section class="writing-canvas" id="view-writer">
+        <div class="canvas-paper">
+          <!-- Post Title Bar -->
+          <div class="titlebar-row">
+            <input id="title" name="title" type="text" class="title-input" placeholder="输入文章标题..." aria-label="文章标题" required autofocus>
+            <div class="mode-badge-wrap">
+              <span class="status-chip" id="composer-mode-chip">新建模式</span>
             </div>
-            
-            <div class="auth-actions-row">
-              <a href="https://github.com/settings/tokens/new?scopes=repo&amp;description=Craig%20Blog%20Composer" target="_blank" rel="noopener noreferrer" class="token-link">
-                获取 Token (需 repo 权限) ↗
-              </a>
-              <button class="action-button primary" id="gate-unlock-btn" type="button">
-                <span class="btn-icon">🔓</span>
-                <span class="btn-text">验证并解锁</span>
+          </div>
+
+          <!-- Metadata Capsule Toolbar -->
+          <div class="metadata-bar">
+            <!-- Tag Chips & Inline Quick Add -->
+            <div class="meta-tag-zone">
+              <div class="tag-chip-list" id="selected-tags" aria-live="polite"></div>
+              <div class="tag-quick-add">
+                <input id="tags-input" name="tags" type="text" placeholder="+ 标签 (按 Enter 添加)">
+                <button class="action-button secondary compact hidden" id="add-tag" type="button">添加</button>
+              </div>
+            </div>
+
+            <!-- Metadata Capsule Buttons (Popovers) -->
+            <div class="meta-capsules">
+              <button class="meta-capsule-btn" id="capsule-date-btn" type="button" title="设置发布时间">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span id="capsule-date-text">今天</span>
+              </button>
+
+              <button class="meta-capsule-btn" id="capsule-lang-btn" type="button" title="设置语言">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="2" y1="12" x2="22" y2="12"></line>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+                <span id="capsule-lang-text">简体中文</span>
+              </button>
+
+              <button class="meta-capsule-btn" id="capsule-more-btn" type="button" title="高级设置 (Slug, 摘要, 密码)">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="1"></circle>
+                  <circle cx="19" cy="12" r="1"></circle>
+                  <circle cx="5" cy="12" r="1"></circle>
+                </svg>
+                <span>属性设置</span>
               </button>
             </div>
+          </div>
 
-            <p id="gate-status-msg" class="auth-status-text"></p>
+          <!-- Metadata Popover Panel -->
+          <div class="meta-popover-card" id="meta-popover" hidden>
+            <div class="popover-header">
+              <span class="popover-title">文章属性设置</span>
+              <button class="popover-close-btn" id="close-popover-btn" type="button">✕</button>
+            </div>
+
+            <div class="popover-body stack">
+              <div class="grid two">
+                <label>
+                  <span class="field-label">语言</span>
+                  <select id="lang" name="lang">
+                    <option value="zh-Hans" selected>简体中文</option>
+                    <option value="zh-Hant">繁體中文</option>
+                    <option value="ja">日本語</option>
+                    <option value="en-US">English</option>
+                  </select>
+                </label>
+
+                <label>
+                  <span class="field-label">发布时间</span>
+                  <input id="publishAt" name="publishAt" type="datetime-local" required>
+                </label>
+              </div>
+
+              <label>
+                <span class="field-label">文章摘要 (留空默认保持为空，不自动生成)</span>
+                <textarea id="excerpt" name="excerpt" rows="2" placeholder="首页和 Archive 用的摘要。留空即保持为空。"></textarea>
+              </label>
+
+              <label>
+                <span class="field-label">文件 Slug</span>
+                <input id="slug" name="slug" type="text" placeholder="默认根据标题自动生成">
+                <span class="field-help" id="slug-help">建议使用英文、数字和连字符。留空时会自动生成安全 slug。</span>
+              </label>
+
+              <label>
+                <span class="field-label">访问密码 (可选)</span>
+                <input id="post-password" name="post-password" type="password" placeholder="留空则不加密">
+                <span class="field-help">若设置密码，文章保存时将自动进行客户端 AES 加密保护。</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Integrated Markdown Editor Toolbar -->
+          <div class="editor-toolbar-dock">
+            <div class="toolbar-scroll-wrap">
+              <div class="toolbar-group">
+                <button class="tool-button" data-action="h1" type="button" title="一级标题 (H1)">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 12h8" /><path d="M4 18V6" /><path d="M12 18V6" /><path d="M17 12l2-2v8" />
+                  </svg>
+                </button>
+                <button class="tool-button" data-action="h2" type="button" title="二级标题 (H2)">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 12h8" /><path d="M4 18V6" /><path d="M12 18V6" /><path d="M21 18h-4c0-4 4-3 4-6 0-1.5-1-2.5-2.5-2.5S16 8.5 16 10" />
+                  </svg>
+                </button>
+                <button class="tool-button" data-action="h3" type="button" title="三级标题 (H3)">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 12h8" /><path d="M4 18V6" /><path d="M12 18V6" /><path d="M16 10h4c0 3-2 3-2 3s2 0 2 3c0 1.5-1.5 2.5-2.5 2.5h-3.5" />
+                  </svg>
+                </button>
+              </div>
+
+              <div class="toolbar-divider"></div>
+
+              <div class="toolbar-group">
+                <button class="tool-button" data-action="bold" type="button" title="加粗 (Ctrl+B)">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z" /><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z" />
+                  </svg>
+                </button>
+                <button class="tool-button" data-action="italic" type="button" title="斜体 (Ctrl+I)">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="4" x2="10" y2="4" /><line x1="14" y1="20" x2="5" y2="20" /><line x1="15" y1="4" x2="9" y2="20" />
+                  </svg>
+                </button>
+                <button class="tool-button" data-action="link" type="button" title="插入链接 (Ctrl+K)">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                  </svg>
+                </button>
+                <button class="tool-button" data-action="inline-code" type="button" title="行内代码">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" />
+                  </svg>
+                </button>
+              </div>
+
+              <div class="toolbar-divider"></div>
+
+              <div class="toolbar-group">
+                <button class="tool-button" data-action="quote" type="button" title="引用块">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 3v18" stroke-width="3" /><path d="M9 5h12" /><path d="M9 12h12" /><path d="M9 19h12" />
+                  </svg>
+                </button>
+                <button class="tool-button" data-action="ul" type="button" title="无序列表">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" />
+                    <line x1="3" y1="6" x2="3.01" y2="6" stroke-width="3" /><line x1="3" y1="12" x2="3.01" y2="12" stroke-width="3" /><line x1="3" y1="18" x2="3.01" y2="18" stroke-width="3" />
+                  </svg>
+                </button>
+                <button class="tool-button" data-action="task" type="button" title="任务列表">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="7" height="7" rx="1.5" /><path d="M3 19l2 2 4-4" /><line x1="14" y1="7" x2="21" y2="7" /><line x1="14" y1="17" x2="21" y2="17" />
+                  </svg>
+                </button>
+                <button class="tool-button" data-action="code-block" type="button" title="代码块">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="4" width="20" height="16" rx="2" /><path d="M6 8l3 3-3 3" /><line x1="11" y1="14" x2="15" y2="14" />
+                  </svg>
+                </button>
+              </div>
+
+              <div class="toolbar-divider"></div>
+
+              <div class="toolbar-group">
+                <button class="tool-button" id="insert-local-image" type="button" title="插入图片 (直接 Ctrl+V 粘贴截图或拖拽)">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /><path d="M17 5v6M14 8h6" />
+                  </svg>
+                </button>
+                <button class="tool-button mobile-only-btn" id="mobile-camera-btn" type="button" title="拍照插入图片">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                    <circle cx="12" cy="13" r="4"></circle>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hidden File Pickers -->
+          <input id="image-picker" class="hidden" type="file" accept="image/*" multiple>
+          <input id="camera-picker" class="hidden" type="file" accept="image/*" capture="environment">
+
+          <!-- Main Markdown Textarea -->
+          <textarea
+            id="body"
+            class="editor-textarea"
+            name="body"
+            spellcheck="false"
+            placeholder="在此输入 Markdown 正文...&#10;&#10;✨ 提示：&#10;• 支持直接 Ctrl+V 粘贴剪贴板截图或拖入图片&#10;• 支持 Ctrl+B 加粗、Ctrl+I 斜体、Ctrl+K 超链接&#10;• 随时按 Ctrl+Enter 一键发布到博客"
+            required
+          ></textarea>
+
+          <!-- Canvas Footer Status Bar -->
+          <div class="canvas-footer">
+            <div class="footer-left">
+              <span id="editor-stats">0 字 · 0 行</span>
+              <span class="footer-dot">·</span>
+              <span id="file-name" class="footer-file-meta" title="文件名"></span>
+            </div>
+
+            <div class="footer-right">
+              <span id="status" class="status-indicator-text" aria-live="polite"></span>
+              <button class="footer-link-btn" id="download-post" type="button" title="导出 .md 文件">导出 .md</button>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- Main App Layout (Visible after authentication or in local mode) -->
-      <div class="layout" id="composer-layout">
-        <!-- Sidebar: Article Library -->
-        <aside class="panel library-panel" id="library-panel">
-          <div class="library-rail">
-            <button class="library-toggle" id="toggle-library" type="button" aria-expanded="false" aria-controls="library-content" title="展开文章库">
-              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                <path fill="currentColor" d="M8.7 5.3 10.1 4l8 8-8 8-1.4-1.3 6.7-6.7-6.7-6.7z"/>
-              </svg>
-              <span class="visually-hidden" id="library-toggle-label">展开文章库</span>
-            </button>
-            <div class="library-collapsed-summary" aria-hidden="true">
-              <span class="library-rail-label">文库</span>
-              <span class="library-current-meta" id="library-current-meta">新建</span>
-            </div>
+      <!-- Right Column: Live Synchronized Preview -->
+      <aside class="preview-canvas" id="view-preview">
+        <div class="preview-paper">
+          <div class="preview-header-bar">
+            <span class="preview-header-title">实时预览</span>
+            <span class="preview-sync-badge">同步渲染</span>
           </div>
 
-          <div class="library-content" id="library-content">
-            <div class="library-header">
-              <h2>文章库</h2>
-              <button class="action-button primary compact" id="new-post" type="button" title="新建文章">
-                <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
-                  <path fill="currentColor" d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5z"/>
-                </svg>
-                <span>新建文章</span>
-              </button>
+          <article class="preview-article">
+            <div class="preview-meta-row">
+              <span class="preview-date" id="preview-date">POST</span>
             </div>
-            <div class="library-search">
-              <input id="post-search" name="post-search" type="text" placeholder="搜索标题、文件名或标签...">
+            <h1 class="preview-main-title" id="preview-title">在左侧输入标题和正文</h1>
+            <div class="preview-tags" id="preview-tags"></div>
+            
+            <div class="preview-content-body" id="preview-host">
+              <p class="preview-empty">这里会实时呈现与博客正文一致的排版渲染，支持 Markdown、代码高亮、公式和图片。</p>
             </div>
-            <div class="post-library-list" id="post-list" aria-live="polite"></div>
-          </div>
-        </aside>
-
-        <!-- Main Content & Preview Area -->
-        <div class="content-split">
-          <main class="composer-main" id="view-writer">
-            <section class="panel composer-workspace">
-              <section class="editor-card stack">
-                <div class="section-heading composer-titlebar">
-                  <h2 class="section-title visually-hidden" id="composer-heading">新建文章</h2>
-                  <input id="title" name="title" type="text" class="title-input" placeholder="输入文章标题..." aria-label="文章标题" required>
-                  <div class="composer-mode-row">
-                    <div class="status-chip" id="composer-mode-chip">新建模式</div>
-                  </div>
-                </div>
-
-                <div class="field-group tag-field">
-                  <span class="field-label">文章标签</span>
-                  <div class="tag-chip-list" id="selected-tags" aria-live="polite"></div>
-                  <div class="tag-input-row">
-                    <input id="tags-input" name="tags" type="text" placeholder="输入标签后按 Enter 添加">
-                    <button class="action-button secondary compact" id="add-tag" type="button">添加标签</button>
-                  </div>
-                </div>
-
-                <details class="drawer-card" id="advanced-fields">
-                  <summary>文章设置 (语言、发布时间、摘要、Slug、密码)</summary>
-                  <div class="details-body stack">
-                    <div class="grid two">
-                      <label>
-                        <span class="field-label">语言</span>
-                        <select id="lang" name="lang">
-                          <option value="zh-Hans" selected>简体中文</option>
-                          <option value="zh-Hant">繁體中文</option>
-                          <option value="ja">日本語</option>
-                          <option value="en-US">English</option>
-                        </select>
-                      </label>
-
-                      <label>
-                        <span class="field-label">发布时间</span>
-                        <input id="publishAt" name="publishAt" type="datetime-local" required>
-                      </label>
-                    </div>
-
-                    <label>
-                      <span class="field-label">摘要 (留空默认保持为空，不自动生成)</span>
-                      <textarea id="excerpt" name="excerpt" rows="2" placeholder="首页和 Archive 用的摘要。留空即保持为空，不自动生成。"></textarea>
-                    </label>
-
-                    <label>
-                      <span class="field-label">文件 Slug</span>
-                      <input id="slug" name="slug" type="text" placeholder="默认根据标题自动生成">
-                      <span class="field-help" id="slug-help">建议使用英文、数字和连字符。留空时会自动生成安全 slug。</span>
-                    </label>
-
-                    <label>
-                      <span class="field-label">访问密码 (可选)</span>
-                      <input id="post-password" name="post-password" type="password" placeholder="留空则不加密本篇文章">
-                      <span class="field-help">若设置密码，文章保存时将自动进行客户端 AES 加密保护。</span>
-                    </label>
-                  </div>
-                </details>
-
-                <div class="editor-container">
-                  <div class="toolbar-shell">
-                    <div class="toolbar" aria-label="Markdown toolbar">
-                      <div class="toolbar-group">
-                        <button class="tool-button" data-action="h1" type="button" title="一级标题 (H1)">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M4 12h8" /><path d="M4 18V6" /><path d="M12 18V6" /><path d="M17 12l2-2v8" />
-                          </svg>
-                        </button>
-                        <button class="tool-button" data-action="h2" type="button" title="二级标题 (H2)">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M4 12h8" /><path d="M4 18V6" /><path d="M12 18V6" /><path d="M21 18h-4c0-4 4-3 4-6 0-1.5-1-2.5-2.5-2.5S16 8.5 16 10" />
-                          </svg>
-                        </button>
-                        <button class="tool-button" data-action="h3" type="button" title="三级标题 (H3)">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M4 12h8" /><path d="M4 18V6" /><path d="M12 18V6" /><path d="M16 10h4c0 3-2 3-2 3s2 0 2 3c0 1.5-1.5 2.5-2.5 2.5h-3.5" />
-                          </svg>
-                        </button>
-                      </div>
-                      <div class="toolbar-group">
-                        <button class="tool-button" data-action="bold" type="button" title="加粗 (Ctrl+B)">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z" /><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z" />
-                          </svg>
-                        </button>
-                        <button class="tool-button" data-action="italic" type="button" title="斜体 (Ctrl+I)">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="19" y1="4" x2="10" y2="4" /><line x1="14" y1="20" x2="5" y2="20" /><line x1="15" y1="4" x2="9" y2="20" />
-                          </svg>
-                        </button>
-                        <button class="tool-button" data-action="link" type="button" title="插入链接 (Ctrl+K)">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                          </svg>
-                        </button>
-                        <button class="tool-button" data-action="inline-code" type="button" title="行内代码">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" />
-                          </svg>
-                        </button>
-                      </div>
-                      <div class="toolbar-group">
-                        <button class="tool-button" data-action="quote" type="button" title="引用块">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M3 3v18" stroke-width="3" /><path d="M9 5h12" /><path d="M9 12h12" /><path d="M9 19h12" />
-                          </svg>
-                        </button>
-                        <button class="tool-button" data-action="ul" type="button" title="无序列表">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" />
-                            <line x1="3" y1="6" x2="3.01" y2="6" stroke-width="3" /><line x1="3" y1="12" x2="3.01" y2="12" stroke-width="3" /><line x1="3" y1="18" x2="3.01" y2="18" stroke-width="3" />
-                          </svg>
-                        </button>
-                        <button class="tool-button" data-action="task" type="button" title="任务列表">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="4" width="7" height="7" rx="1.5" /><path d="M3 19l2 2 4-4" /><line x1="14" y1="7" x2="21" y2="7" /><line x1="14" y1="17" x2="21" y2="17" />
-                          </svg>
-                        </button>
-                      </div>
-                      <div class="toolbar-group">
-                        <button class="tool-button" data-action="code-block" type="button" title="代码块">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="2" y="4" width="20" height="16" rx="2" /><path d="M6 8l3 3-3 3" /><line x1="11" y1="14" x2="15" y2="14" />
-                          </svg>
-                        </button>
-                        <button class="tool-button" id="insert-local-image" type="button" title="插入图片（支持直接 Ctrl+V 粘贴截图或拖拽图片）">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /><path d="M17 5v6M14 8h6" />
-                          </svg>
-                        </button>
-                        <button class="tool-button mobile-only-btn" id="mobile-camera-btn" type="button" title="拍照插入图片">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                            <circle cx="12" cy="13" r="4"></circle>
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Hidden File Pickers -->
-                  <input id="image-picker" class="hidden" type="file" accept="image/*" multiple>
-                  <input id="camera-picker" class="hidden" type="file" accept="image/*" capture="environment">
-
-                  <textarea
-                    id="body"
-                    class="editor-area"
-                    name="body"
-                    spellcheck="false"
-                    placeholder="输入 Markdown 正文。支持粘贴/拖拽图片、Ctrl+B、Ctrl+I、Ctrl+Enter 一键发布。"
-                    required
-                  ></textarea>
-                </div>
-
-                <div class="action-row">
-                  <div class="editor-meta">
-                    <span id="editor-stats">0 字符 | 0 行</span>
-                    <span id="file-name" class="editor-target-file" title="保存后生成的文件名"></span>
-                  </div>
-                  <div class="action-buttons">
-                    <button class="action-button ghost compact" id="download-post" type="button" title="导出 .md 备份">导出 .md</button>
-                    <button class="action-button primary" id="save-publish-post" type="button">
-                      <span class="btn-icon">🚀</span>
-                      <span class="btn-text">发布到博客</span>
-                    </button>
-                  </div>
-                </div>
-
-                <p id="status" class="status-text" aria-live="polite"></p>
-              </section>
-
-              <details class="drawer-card helper-drawer">
-                <summary>快捷键与发帖帮助</summary>
-                <div class="details-body">
-                  <ul class="helper-list">
-                    <li><strong>🚀 一键发布</strong>：点击「发布到博客」或按 <code>Ctrl + Enter</code>，全自动保存并推送到 GitHub。</li>
-                    <li><strong>📱 手机发帖</strong>：在手机浏览器打开本页，在设置中填入 GitHub Token，即可随时随地拍照写文发布。</li>
-                    <li><strong>📷 插图</strong>：桌面可直接 <code>Ctrl + V</code> 粘贴截图或拖入；手机可点击工具栏相机直接拍照上传。</li>
-                    <li><strong>⌨️ 常用快捷键</strong>：<code>Ctrl + Enter</code> 发布、<code>Ctrl + S</code> 存草稿、<code>Ctrl + B</code> 粗体、<code>Ctrl + K</code> 链接。</li>
-                  </ul>
-                </div>
-              </details>
-            </section>
-          </main>
-
-          <!-- Preview Area -->
-          <aside class="panel preview-panel" id="view-preview">
-            <div class="preview-panel-inner">
-              <div class="preview-heading">
-                <h2 class="section-title">实时预览</h2>
-              </div>
-
-              <article class="preview-article">
-                <p class="preview-date" id="preview-date">POST</p>
-                <h1 id="preview-title">在左边输入标题和正文</h1>
-                <div class="preview-tags" id="preview-tags"></div>
-                <div class="preview-body" id="preview-host">
-                  <p class="preview-empty">这里会实时渲染接近博客文章页的预览，包括标题、段落、列表、代码块和图片。</p>
-                </div>
-              </article>
-            </div>
-          </aside>
+          </article>
         </div>
-      </div>
-    </div>
+      </aside>
+    </main>
 
     <!-- Modal: Publish Success Celebration Modal -->
     <div class="modal-overlay" id="publish-success-modal" hidden>

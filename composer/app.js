@@ -51,6 +51,21 @@ const ENCRYPTED_SIG = "::ENCRYPTED::";
 const insertLocalImageButton = document.querySelector("#insert-local-image");
 const toolbarButtons = document.querySelectorAll("[data-action]");
 
+// Header, Drawer, Capsule & Popover Elements
+const openLibraryBtn = document.querySelector("#open-library-btn");
+const closeLibraryBtn = document.querySelector("#close-library-btn");
+const libraryBackdrop = document.querySelector("#library-backdrop");
+const libraryDrawer = document.querySelector("#library-drawer");
+const libraryBadgeCount = document.querySelector("#library-badge-count");
+const saveDraftBtn = document.querySelector("#save-draft-btn");
+const capsuleDateBtn = document.querySelector("#capsule-date-btn");
+const capsuleDateText = document.querySelector("#capsule-date-text");
+const capsuleLangBtn = document.querySelector("#capsule-lang-btn");
+const capsuleLangText = document.querySelector("#capsule-lang-text");
+const capsuleMoreBtn = document.querySelector("#capsule-more-btn");
+const metaPopover = document.querySelector("#meta-popover");
+const closePopoverBtn = document.querySelector("#close-popover-btn");
+
 // Modals, Security Gate and Mobile controls
 const openSettingsBtn = document.querySelector("#open-settings-btn");
 const authGateScreen = document.querySelector("#auth-gate-screen");
@@ -711,7 +726,43 @@ async function loadPostsIndex() {
   }
 }
 
+function openLibraryDrawer() {
+  document.body.classList.add("drawer-open");
+  if (libraryDrawer) libraryDrawer.hidden = false;
+  if (libraryBackdrop) libraryBackdrop.hidden = false;
+}
+
+function closeLibraryDrawer() {
+  document.body.classList.remove("drawer-open");
+  setTimeout(() => {
+    if (libraryDrawer && !document.body.classList.contains("drawer-open")) {
+      libraryDrawer.hidden = true;
+    }
+    if (libraryBackdrop && !document.body.classList.contains("drawer-open")) {
+      libraryBackdrop.hidden = true;
+    }
+  }, 260);
+}
+
+function toggleMetaPopover() {
+  if (!metaPopover) return;
+  metaPopover.hidden = !metaPopover.hidden;
+}
+
+function updateCapsuleLabels() {
+  if (capsuleDateText && publishInput) {
+    capsuleDateText.textContent = formatPreviewDate(publishInput.value, langInput?.value || "zh-Hans");
+  }
+  if (capsuleLangText && langInput) {
+    const selectedOption = langInput.options[langInput.selectedIndex];
+    capsuleLangText.textContent = selectedOption ? selectedOption.text : "简体中文";
+  }
+}
+
 function renderPostList() {
+  if (libraryBadgeCount) {
+    libraryBadgeCount.textContent = state.postsIndex.length;
+  }
   if (!postListEl) return;
   const filter = (postSearchInput ? postSearchInput.value.trim().toLowerCase() : "");
   postListEl.innerHTML = "";
@@ -732,13 +783,17 @@ function renderPostList() {
 
   filtered.forEach((post) => {
     const item = document.createElement("div");
-    item.className = "post-library-item" + (state.mode === "edit" && state.originalFileName === post.fileName ? " is-active" : "");
+    item.className = "post-library-item" + (state.mode === "edit" && state.originalFileName === post.fileName ? " is-current" : "");
     item.innerHTML = `
       <div class="post-library-info" data-open-post="${escapeHtml(post.fileName)}">
-        <h4 class="post-library-title">${escapeHtml(post.title || post.fileName)}</h4>
-        <span class="post-library-date">${escapeHtml(post.date ? post.date.slice(0, 10) : post.fileName.slice(0, 10))}</span>
+        <h4 class="post-library-item-title">${escapeHtml(post.title || post.fileName)}</h4>
+        <div class="post-library-item-meta">
+          <span>${escapeHtml(post.date ? post.date.slice(0, 10) : post.fileName.slice(0, 10))}</span>
+          ${post.encrypted ? '<span class="post-meta-badge encrypted">🔒 加密</span>' : ''}
+          ${post.tags && post.tags.length ? `<span class="post-meta-badge">${escapeHtml(post.tags.slice(0, 2).join(", "))}</span>` : ''}
+        </div>
       </div>
-      <div class="post-library-actions">
+      <div class="post-library-actions" style="position:absolute; right:10px; top:10px;">
         <button class="tool-button" data-delete-post="${escapeHtml(post.fileName)}" title="删除此文章">🗑️</button>
       </div>
     `;
@@ -774,6 +829,7 @@ function enterCreateMode({ snapshot, baseline, focus = true }) {
   renderSelectedTags();
   renderPreview();
   updateEditorStats();
+  updateCapsuleLabels();
 
   if (focus) titleInput.focus();
 }
@@ -823,7 +879,7 @@ async function openPostForEditing(fileName) {
     if (passwordInput) passwordInput.value = "";
 
     if (composerModeChip) {
-      composerModeChip.textContent = "编辑模式";
+      composerModeChip.textContent = `编辑: ${fileName.slice(0, 10)}`;
       composerModeChip.className = "status-chip mode-edit";
     }
 
@@ -831,7 +887,9 @@ async function openPostForEditing(fileName) {
     renderSelectedTags();
     renderPreview();
     updateEditorStats();
+    updateCapsuleLabels();
     renderPostList();
+    closeLibraryDrawer();
     setStatus(`已加载 ${fileName}`, "success");
 
     // Close library drawer on mobile after selection
@@ -850,6 +908,7 @@ function switchToNewPost() {
   }
   clearDraftByKey("create");
   enterCreateMode({ snapshot: emptySnapshot(), baseline: emptySnapshot() });
+  closeLibraryDrawer();
   setStatus("已切换到新建文章模式。", "");
 }
 
@@ -1302,14 +1361,62 @@ function initEventListeners() {
     }
   });
 
-  // Search
+  // Library Drawer
+  openLibraryBtn?.addEventListener("click", openLibraryDrawer);
+  closeLibraryBtn?.addEventListener("click", closeLibraryDrawer);
+  libraryBackdrop?.addEventListener("click", closeLibraryDrawer);
+
+  // Search & New Post
   postSearchInput?.addEventListener("input", renderPostList);
   newPostButton?.addEventListener("click", switchToNewPost);
 
-  // Library Toggle
-  toggleLibraryButton?.addEventListener("click", () => {
-    state.libraryExpanded = !state.libraryExpanded;
-    composerLayout?.classList.toggle("library-open", state.libraryExpanded);
+  // Save Draft Button
+  saveDraftBtn?.addEventListener("click", () => {
+    flushPendingWork();
+    setStatus("✅ 草稿已保存至本地", "success");
+  });
+
+  // Metadata Capsule & Popovers
+  capsuleDateBtn?.addEventListener("click", toggleMetaPopover);
+  capsuleLangBtn?.addEventListener("click", toggleMetaPopover);
+  capsuleMoreBtn?.addEventListener("click", toggleMetaPopover);
+  closePopoverBtn?.addEventListener("click", () => {
+    if (metaPopover) metaPopover.hidden = true;
+  });
+
+  langInput?.addEventListener("change", () => {
+    updateCapsuleLabels();
+    schedulePreview();
+  });
+
+  publishInput?.addEventListener("change", () => {
+    updateCapsuleLabels();
+    schedulePreview();
+  });
+
+  // Tag Quick Add on Enter
+  tagsInput?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      collectPendingTags();
+    }
+  });
+
+  // Global Keyboard Shortcuts (Ctrl+Enter, Ctrl+S, Esc)
+  document.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      e.preventDefault();
+      publishPost();
+    } else if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "S")) {
+      e.preventDefault();
+      flushPendingWork();
+      setStatus("✅ 草稿已保存", "success");
+    } else if (e.key === "Escape") {
+      closeLibraryDrawer();
+      closeSettingsModal();
+      if (metaPopover) metaPopover.hidden = true;
+      if (publishSuccessModal) publishSuccessModal.hidden = true;
+    }
   });
 
   // Mobile View Switcher (Write / Preview)
