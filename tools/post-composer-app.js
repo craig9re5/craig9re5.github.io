@@ -218,16 +218,34 @@ function yamlString(value) {
 }
 
 function b64EncodeUnicode(str) {
-  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
-    return String.fromCharCode('0x' + p1);
-  }));
+  try {
+    const bytes = new TextEncoder().encode(str);
+    let binary = "";
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+  } catch (e) {
+    console.error("Encode failed:", e);
+    return "";
+  }
 }
 
 function b64DecodeUnicode(str) {
-  const clean = str.replace(/\s/g, "");
-  return decodeURIComponent(atob(clean).split('').map(function(c) {
-    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-  }).join(''));
+  if (!str) return "";
+  try {
+    const clean = str.replace(/[\r\n\s]/g, "");
+    const binary = atob(clean);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return new TextDecoder("utf-8").decode(bytes);
+  } catch (e) {
+    console.error("Decode failed:", e);
+    return "";
+  }
 }
 
 /* ---------------- GitHub API Client Helper ---------------- */
@@ -730,6 +748,9 @@ function openLibraryDrawer() {
   document.body.classList.add("drawer-open");
   if (libraryDrawer) libraryDrawer.hidden = false;
   if (libraryBackdrop) libraryBackdrop.hidden = false;
+  if (state.postsIndex.length === 0 && (state.githubToken || state.engine === ENGINE_LOCAL)) {
+    loadPostsIndex();
+  }
 }
 
 function closeLibraryDrawer() {
@@ -851,16 +872,52 @@ async function openPostForEditing(fileName) {
         const found = (data.posts || []).find((p) => p.fileName === fileName);
         if (found) source = found.source;
       } else {
-        // Fetch from GitHub API
-        const { response, data } = await fetchGhApi(`/repos/${GH_OWNER}/${GH_REPO}/contents/_posts/${fileName}?ref=${GH_BRANCH}`);
-        if (!response.ok) throw new Error(data.message || "无法从 GitHub 获取文章内容");
+        // Fetch from GitHub API with properly encoded filename
+        const endpoint = `/repos/${GH_OWNER}/${GH_REPO}/contents/_posts/${encodeURIComponent(fileName)}?ref=${GH_BRANCH}`;
+        const { response, data } = await fetchGhApi(endpoint);
+        if (!response.ok) {
+          throw new Error(data.message || `GitHub 响应错误 (${response.status})`);
+        }
         source = b64DecodeUnicode(data.content || "");
-        if (data.sha) state.fileShas.set(fileName, data.sha);
+        if (data.sha) {
+          state.fileShas.set(fileName, data.sha);
+        }
       }
     }
 
-    if (!source) throw new Error("未找到文章内容");
+    if (!source) throw new Error("未能获取到文章正文内容");
     post = parsePostDocument(fileName, source, Date.now());
+
+    // Handle encrypted post decryption if present
+    let initialBody = post.body;
+    let initialExcerpt = post.excerpt;
+    let initialPassword = "";
+
+    if (post.encrypted && post.encrypted_data && typeof CryptoJS !== "undefined") {
+      const pwd = window.prompt(`文章《${post.title}》已加密，请输入密码以解密编辑（留空则不解密）：`);
+      if (pwd) {
+        try {
+          const decryptedBytes = CryptoJS.AES.decrypt(post.encrypted_data, pwd);
+          const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
+          if (decryptedText.startsWith(ENCRYPTED_SIG)) {
+            initialBody = decryptedText.slice(ENCRYPTED_SIG.length).replace(/^\n/, "");
+            initialPassword = pwd;
+            if (post.encrypted_excerpt) {
+              const decExBytes = CryptoJS.AES.decrypt(post.encrypted_excerpt, pwd);
+              const decExText = decExBytes.toString(CryptoJS.enc.Utf8);
+              if (decExText.startsWith(ENCRYPTED_SIG)) {
+                initialExcerpt = decExText.slice(ENCRYPTED_SIG.length).replace(/^\n/, "");
+              }
+            }
+            setStatus("✅ 解密成功", "success");
+          } else {
+            alert("密码错误，无法解密正文。");
+          }
+        } catch {
+          alert("解密失败：密码错误或数据损坏。");
+        }
+      }
+    }
 
     state.mode = "edit";
     state.originalFileName = fileName;
@@ -873,10 +930,10 @@ async function openPostForEditing(fileName) {
     langInput.value = post.lang;
     publishInput.value = post.publishAt || defaultDateTimeLocal();
     slugInput.value = post.slug;
-    if (excerptInput) excerptInput.value = post.excerpt;
+    if (excerptInput) excerptInput.value = initialExcerpt;
     state.selectedTags = [...post.tags];
-    bodyInput.value = post.body;
-    if (passwordInput) passwordInput.value = "";
+    bodyInput.value = initialBody;
+    if (passwordInput) passwordInput.value = initialPassword;
 
     if (composerModeChip) {
       composerModeChip.textContent = `编辑: ${fileName.slice(0, 10)}`;
@@ -890,7 +947,7 @@ async function openPostForEditing(fileName) {
     updateCapsuleLabels();
     renderPostList();
     closeLibraryDrawer();
-    setStatus(`已加载 ${fileName}`, "success");
+    setStatus(`已载入《${post.title}》`, "success");
 
     // Close library drawer on mobile after selection
     if (window.innerWidth < 860) {
@@ -898,7 +955,9 @@ async function openPostForEditing(fileName) {
       if (tabWrite) tabWrite.click();
     }
   } catch (error) {
+    console.error("Failed to load post:", error);
     setStatus("载入失败：" + error.message, "error");
+    alert(`无法打开文章《${fileName}》：${error.message}`);
   }
 }
 
@@ -1329,15 +1388,11 @@ function initEventListeners() {
     if (btn) toggleTag(btn.dataset.toggleTag);
   });
 
-  // Post List Click
+  // Post List Click Delegation
   postListEl?.addEventListener("click", async (e) => {
-    const openBtn = e.target.closest("[data-open-post]");
-    if (openBtn) {
-      openPostForEditing(openBtn.dataset.openPost);
-      return;
-    }
     const delBtn = e.target.closest("[data-delete-post]");
     if (delBtn) {
+      e.stopPropagation();
       const fileName = delBtn.dataset.deletePost;
       if (window.confirm(`确定删除文章《${fileName}》吗？`)) {
         // Delete post
@@ -1349,7 +1404,7 @@ function initEventListeners() {
           });
         } else {
           const sha = state.fileShas.get(fileName);
-          await fetchGhApi(`/repos/${GH_OWNER}/${GH_REPO}/contents/_posts/${fileName}`, {
+          await fetchGhApi(`/repos/${GH_OWNER}/${GH_REPO}/contents/_posts/${encodeURIComponent(fileName)}`, {
             method: "DELETE",
             body: JSON.stringify({ message: `post: delete ${fileName}`, sha, branch: GH_BRANCH })
           });
@@ -1357,6 +1412,16 @@ function initEventListeners() {
         await loadPostsIndex();
         if (state.originalFileName === fileName) switchToNewPost();
         setStatus(`已删除 ${fileName}`, "warn");
+      }
+      return;
+    }
+
+    const item = e.target.closest(".post-library-item");
+    if (item) {
+      const openEl = item.querySelector("[data-open-post]");
+      const fileName = openEl ? openEl.dataset.openPost : null;
+      if (fileName) {
+        openPostForEditing(fileName);
       }
     }
   });
