@@ -14,7 +14,7 @@ hide_page_heading: true
 
       <div class="about-profile-identity">
         <div class="about-profile-copy">
-          <p class="about-name">クレゴ</p>
+          <h1 class="about-name" lang="ja">クレゴ</h1>
           <blockquote class="about-quote" lang="zh-Hans">我现在已经不做自己的梦了，有时候我觉得我是你。</blockquote>
         </div>
         <div class="about-avatar-shell">

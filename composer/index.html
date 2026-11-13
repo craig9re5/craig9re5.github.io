@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="color-scheme" content="light dark">
     <title>发帖器</title>
     
     <!-- PWA & Mobile Web App Meta -->
@@ -28,7 +29,7 @@
         <h1 class="brand-title">发帖器</h1>
         
         <!-- Library Drawer Trigger Button -->
-        <button class="topbar-btn" id="open-library-btn" type="button" title="打开文章库">
+        <button class="topbar-btn" id="open-library-btn" type="button" title="打开文章库" aria-expanded="false" aria-controls="library-drawer">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
@@ -46,8 +47,8 @@
 
       <!-- Mobile View Segmented Switcher (Visible on mobile screens) -->
       <div class="mobile-segmented-control" id="mobile-view-tabs" role="tablist" aria-label="移动端视图切换">
-        <button class="tab-btn active" id="tab-write" type="button" role="tab" aria-selected="true">✏️ 写作</button>
-        <button class="tab-btn" id="tab-preview" type="button" role="tab" aria-selected="false">👁️ 预览</button>
+        <button class="tab-btn active" id="tab-write" type="button" role="tab" aria-selected="true" aria-controls="view-writer">✏️ 写作</button>
+        <button class="tab-btn" id="tab-preview" type="button" role="tab" aria-selected="false" aria-controls="view-preview">👁️ 预览</button>
       </div>
 
       <div class="masthead-right">
@@ -93,10 +94,10 @@
 
     <!-- Off-Canvas Slide Drawer: Article Library -->
     <div class="drawer-backdrop" id="library-backdrop" hidden></div>
-    <aside class="library-slide-drawer" id="library-drawer" aria-label="文章库抽屉" hidden>
+    <aside class="library-slide-drawer" id="library-drawer" role="dialog" aria-modal="true" aria-labelledby="library-drawer-title" tabindex="-1" hidden>
       <div class="drawer-header">
         <div class="drawer-title-row">
-          <h2 class="drawer-title">文章库</h2>
+          <h2 class="drawer-title" id="library-drawer-title">文章库</h2>
           <button class="action-button primary compact" id="new-post" type="button" title="新建文章">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -114,7 +115,7 @@
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
-          <input id="post-search" name="post-search" type="text" placeholder="搜索标题、文件名或标签...">
+          <input id="post-search" name="post-search" type="text" placeholder="搜索标题、文件名或标签..." aria-label="搜索文章">
         </div>
       </div>
 
@@ -132,7 +133,7 @@
 
         <div class="auth-form-box stack">
           <div class="token-input-group">
-            <input type="password" id="gate-token-input" placeholder="输入 GitHub Token (ghp_...)" autocomplete="off">
+            <input type="password" id="gate-token-input" placeholder="输入 GitHub Token (ghp_...)" aria-label="GitHub 访问令牌" autocomplete="off">
             <button class="action-button secondary compact icon-only" id="gate-toggle-token-btn" type="button" title="显示/隐藏">👁️</button>
           </div>
           
@@ -170,14 +171,14 @@
             <div class="meta-tag-zone">
               <div class="tag-chip-list" id="selected-tags" aria-live="polite"></div>
               <div class="tag-quick-add">
-                <input id="tags-input" name="tags" type="text" placeholder="+ 标签 (按 Enter 添加)">
+                <input id="tags-input" name="tags" type="text" placeholder="+ 标签 (按 Enter 添加)" aria-label="添加文章标签">
                 <button class="action-button secondary compact hidden" id="add-tag" type="button">添加</button>
               </div>
             </div>
 
             <!-- Metadata Capsule Buttons (Popovers) -->
             <div class="meta-capsules">
-              <button class="meta-capsule-btn" id="capsule-date-btn" type="button" title="设置发布时间">
+              <button class="meta-capsule-btn" id="capsule-date-btn" type="button" title="设置发布时间" aria-expanded="false" aria-controls="meta-popover">
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                   <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -187,7 +188,7 @@
                 <span id="capsule-date-text">今天</span>
               </button>
 
-              <button class="meta-capsule-btn" id="capsule-lang-btn" type="button" title="设置语言">
+              <button class="meta-capsule-btn" id="capsule-lang-btn" type="button" title="设置语言" aria-expanded="false" aria-controls="meta-popover">
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="12" cy="12" r="10"></circle>
                   <line x1="2" y1="12" x2="22" y2="12"></line>
@@ -196,7 +197,7 @@
                 <span id="capsule-lang-text">简体中文</span>
               </button>
 
-              <button class="meta-capsule-btn" id="capsule-more-btn" type="button" title="高级设置 (Slug, 摘要, 密码)">
+              <button class="meta-capsule-btn" id="capsule-more-btn" type="button" title="高级设置 (Slug, 摘要, 密码)" aria-expanded="false" aria-controls="meta-popover">
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="12" cy="12" r="1"></circle>
                   <circle cx="19" cy="12" r="1"></circle>
@@ -211,7 +212,7 @@
           <div class="meta-popover-card" id="meta-popover" hidden>
             <div class="popover-header">
               <span class="popover-title">文章属性设置</span>
-              <button class="popover-close-btn" id="close-popover-btn" type="button">✕</button>
+              <button class="popover-close-btn" id="close-popover-btn" type="button" aria-label="关闭属性设置">✕</button>
             </div>
 
             <div class="popover-body stack">
@@ -395,10 +396,10 @@
     </main>
 
     <!-- Modal: Publish Success Celebration Modal -->
-    <div class="modal-overlay" id="publish-success-modal" hidden>
+    <div class="modal-overlay" id="publish-success-modal" role="dialog" aria-modal="true" aria-labelledby="publish-success-title" hidden>
       <div class="modal-card success-card">
         <div class="success-icon-badge">🎉</div>
-        <h3 class="modal-title">博文已成功发布！</h3>
+        <h3 class="modal-title" id="publish-success-title">博文已成功发布！</h3>
         <p class="modal-desc">文章已提交并推送到 GitHub 仓库，GitHub Pages 正在自动构建上线。</p>
         
         <div class="post-link-box">
@@ -417,10 +418,10 @@
     </div>
 
     <!-- Modal: Settings & GitHub Token Config -->
-    <div class="modal-overlay" id="settings-modal" hidden>
+    <div class="modal-overlay" id="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title" hidden>
       <div class="modal-card settings-card">
         <div class="settings-header">
-          <h3 class="modal-title">设置</h3>
+          <h3 class="modal-title" id="settings-modal-title">设置</h3>
           <button class="modal-close-btn" id="close-settings-modal-btn" type="button" aria-label="关闭">✕</button>
         </div>
 

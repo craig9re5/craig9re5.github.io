@@ -26,10 +26,10 @@ lang: en-US
     {% for post in site.posts %}
     <article class="post-card" data-local-post-item data-post-file="{{ post.name | escape }}"{% if forloop.index > 3 %} hidden{% endif %}>
       <p class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</p>
-      <h3><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h3>
+      <h3><a href="{{ post.url | relative_url }}" lang="{{ post.lang | default: site.lang | default: 'en-US' }}">{{ post.title }}</a></h3>
       {% assign card_excerpt = post.excerpt | strip_html | strip %}
       {% if card_excerpt != "" %}
-      <p>{{ card_excerpt | truncate: 150 }}</p>
+      <p lang="{{ post.lang | default: site.lang | default: 'en-US' }}">{{ card_excerpt | truncate: 150 }}</p>
       {% endif %}
     </article>
     {% endfor %}

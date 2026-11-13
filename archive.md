@@ -7,6 +7,8 @@ lang: en-US
 hide_page_heading: true
 ---
 
+<h1 class="sr-only">Archive</h1>
+
 {% if site.posts.size > 0 %}
 <div class="archive-search-wrap">
   <div class="archive-search-input-box">
@@ -33,7 +35,7 @@ hide_page_heading: true
   </li>
   {% endfor %}
 </ul>
-<p class="empty-state archive-filter-empty" id="archive-filter-empty" hidden>No posts match that search.</p>
+<p class="empty-state archive-filter-empty" id="archive-filter-empty" role="status" aria-live="polite" hidden>No posts match that search.</p>
 {% else %}
 <p class="empty-state">No posts yet. Add a Markdown file to the _posts folder and it will appear here automatically.</p>
 {% endif %}

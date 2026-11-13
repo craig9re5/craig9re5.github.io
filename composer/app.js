@@ -64,7 +64,13 @@ const capsuleLangBtn = document.querySelector("#capsule-lang-btn");
 const capsuleLangText = document.querySelector("#capsule-lang-text");
 const capsuleMoreBtn = document.querySelector("#capsule-more-btn");
 const metaPopover = document.querySelector("#meta-popover");
+const metadataBar = document.querySelector(".metadata-bar");
 const closePopoverBtn = document.querySelector("#close-popover-btn");
+
+let lastDrawerTrigger = null;
+let lastModalTrigger = null;
+let lastPopoverTrigger = null;
+let drawerCloseTimer = 0;
 
 // Modals, Security Gate and Mobile controls
 const openSettingsBtn = document.querySelector("#open-settings-btn");
@@ -794,17 +800,35 @@ async function loadPostsIndex() {
 }
 
 function openLibraryDrawer() {
-  document.body.classList.add("drawer-open");
+  if (drawerCloseTimer) {
+    clearTimeout(drawerCloseTimer);
+    drawerCloseTimer = 0;
+  }
+  lastDrawerTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : openLibraryBtn;
   if (libraryDrawer) libraryDrawer.hidden = false;
   if (libraryBackdrop) libraryBackdrop.hidden = false;
+  openLibraryBtn?.setAttribute("aria-expanded", "true");
+  requestAnimationFrame(() => {
+    document.body.classList.add("drawer-open");
+    postSearchInput?.focus({ preventScroll: true });
+  });
   if (state.postsIndex.length === 0 && (state.githubToken || state.engine === ENGINE_LOCAL)) {
     loadPostsIndex();
   }
 }
 
 function closeLibraryDrawer() {
+  if (!libraryDrawer || (libraryDrawer.hidden && !document.body.classList.contains("drawer-open"))) {
+    return;
+  }
+  const focusInsideDrawer = libraryDrawer.contains(document.activeElement);
   document.body.classList.remove("drawer-open");
-  setTimeout(() => {
+  openLibraryBtn?.setAttribute("aria-expanded", "false");
+  if (drawerCloseTimer) {
+    clearTimeout(drawerCloseTimer);
+  }
+  drawerCloseTimer = setTimeout(() => {
+    drawerCloseTimer = 0;
     if (libraryDrawer && !document.body.classList.contains("drawer-open")) {
       libraryDrawer.hidden = true;
     }
@@ -812,11 +836,42 @@ function closeLibraryDrawer() {
       libraryBackdrop.hidden = true;
     }
   }, 260);
+  if (focusInsideDrawer && lastDrawerTrigger && typeof lastDrawerTrigger.focus === "function") {
+    lastDrawerTrigger.focus();
+  }
 }
 
-function toggleMetaPopover() {
+function positionMetaPopover() {
   if (!metaPopover) return;
-  metaPopover.hidden = !metaPopover.hidden;
+  if (window.innerWidth <= 640 || !metadataBar) {
+    metaPopover.style.top = "";
+    return;
+  }
+  metaPopover.style.top = `${metadataBar.offsetTop + metadataBar.offsetHeight + 8}px`;
+}
+
+function setMetaPopoverOpen(open, triggerEl = null) {
+  if (!metaPopover) return;
+  const focusInside = metaPopover.contains(document.activeElement);
+  if (open) {
+    lastPopoverTrigger = triggerEl || (document.activeElement instanceof HTMLElement ? document.activeElement : null);
+    positionMetaPopover();
+    metaPopover.hidden = false;
+  } else {
+    metaPopover.hidden = true;
+    if (focusInside && lastPopoverTrigger && typeof lastPopoverTrigger.focus === "function") {
+      lastPopoverTrigger.focus();
+    }
+  }
+  const expanded = String(Boolean(open));
+  capsuleDateBtn?.setAttribute("aria-expanded", expanded);
+  capsuleLangBtn?.setAttribute("aria-expanded", expanded);
+  capsuleMoreBtn?.setAttribute("aria-expanded", expanded);
+}
+
+function toggleMetaPopover(e) {
+  if (!metaPopover) return;
+  setMetaPopoverOpen(metaPopover.hidden, e?.currentTarget || null);
 }
 
 function updateCapsuleLabels() {
@@ -855,16 +910,16 @@ function renderPostList() {
     const item = document.createElement("div");
     item.className = "post-library-item" + (state.mode === "edit" && state.originalFileName === post.fileName ? " is-current" : "");
     item.innerHTML = `
-      <div class="post-library-info" data-open-post="${escapeHtml(post.fileName)}">
+      <button type="button" class="post-library-open-btn" data-open-post="${escapeHtml(post.fileName)}">
         <h4 class="post-library-item-title">${escapeHtml(post.title || post.fileName)}</h4>
         <div class="post-library-item-meta">
           <span>${escapeHtml(post.date ? post.date.slice(0, 10) : post.fileName.slice(0, 10))}</span>
           ${post.encrypted ? '<span class="post-meta-badge encrypted">🔒 加密</span>' : ''}
           ${post.tags && post.tags.length ? `<span class="post-meta-badge">${escapeHtml(post.tags.slice(0, 2).join(", "))}</span>` : ''}
         </div>
-      </div>
-      <div class="post-library-actions" style="position:absolute; right:10px; top:10px;">
-        <button class="tool-button" data-delete-post="${escapeHtml(post.fileName)}" title="删除此文章">🗑️</button>
+      </button>
+      <div class="post-library-actions">
+        <button type="button" class="tool-button" data-delete-post="${escapeHtml(post.fileName)}" title="删除此文章" aria-label="删除 ${escapeHtml(post.title || post.fileName)}">🗑️</button>
       </div>
     `;
     postListEl.appendChild(item);
@@ -1115,7 +1170,18 @@ function showPublishSuccess(fileName, slug, dateValue) {
     viewPostLinkBtn.href = fullUrl;
   }
   if (publishSuccessModal) {
+    lastModalTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     publishSuccessModal.hidden = false;
+    closeSuccessModalBtn?.focus({ preventScroll: true });
+  }
+}
+
+function closePublishSuccessModal() {
+  if (!publishSuccessModal || publishSuccessModal.hidden) return;
+  const focusInside = publishSuccessModal.contains(document.activeElement);
+  publishSuccessModal.hidden = true;
+  if (focusInside && lastModalTrigger && typeof lastModalTrigger.focus === "function") {
+    lastModalTrigger.focus();
   }
 }
 
@@ -1245,13 +1311,22 @@ async function publishPost() {
 /* ---------------- Settings & Token Modal Handling ---------------- */
 
 function openSettingsModal() {
+  lastModalTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   if (ghTokenInput) ghTokenInput.value = state.githubToken;
   if (tokenStatusMsg) tokenStatusMsg.textContent = "";
-  if (settingsModal) settingsModal.hidden = false;
+  if (settingsModal) {
+    settingsModal.hidden = false;
+    closeSettingsModalBtn?.focus({ preventScroll: true });
+  }
 }
 
 function closeSettingsModal() {
-  if (settingsModal) settingsModal.hidden = true;
+  if (!settingsModal || settingsModal.hidden) return;
+  const focusInside = settingsModal.contains(document.activeElement);
+  settingsModal.hidden = true;
+  if (focusInside && lastModalTrigger && typeof lastModalTrigger.focus === "function") {
+    lastModalTrigger.focus();
+  }
 }
 
 async function testGitHubToken(token, statusTarget) {
@@ -1519,7 +1594,12 @@ function initEventListeners() {
   capsuleLangBtn?.addEventListener("click", toggleMetaPopover);
   capsuleMoreBtn?.addEventListener("click", toggleMetaPopover);
   closePopoverBtn?.addEventListener("click", () => {
-    if (metaPopover) metaPopover.hidden = true;
+    setMetaPopoverOpen(false);
+  });
+  window.addEventListener("resize", () => {
+    if (metaPopover && !metaPopover.hidden) {
+      positionMetaPopover();
+    }
   });
 
   langInput?.addEventListener("change", () => {
@@ -1545,24 +1625,27 @@ function initEventListeners() {
     } else if (e.key === "Escape") {
       closeLibraryDrawer();
       closeSettingsModal();
-      if (metaPopover) metaPopover.hidden = true;
-      if (publishSuccessModal) publishSuccessModal.hidden = true;
+      setMetaPopoverOpen(false);
+      closePublishSuccessModal();
     }
   });
 
   // Mobile View Switcher (Write / Preview)
-  if (tabWrite && tabPreview) {
-    tabWrite.addEventListener("click", () => {
-      tabWrite.classList.add("active");
-      tabPreview.classList.remove("active");
-      document.body.dataset.mobileView = "write";
-    });
-    tabPreview.addEventListener("click", () => {
-      tabPreview.classList.add("active");
-      tabWrite.classList.remove("active");
-      document.body.dataset.mobileView = "preview";
+  function switchMobileTab(view) {
+    const isWrite = view === "write";
+    tabWrite?.classList.toggle("active", isWrite);
+    tabPreview?.classList.toggle("active", !isWrite);
+    tabWrite?.setAttribute("aria-selected", String(isWrite));
+    tabPreview?.setAttribute("aria-selected", String(!isWrite));
+    document.body.dataset.mobileView = view;
+    if (!isWrite) {
       renderPreview();
-    });
+    }
+  }
+
+  if (tabWrite && tabPreview) {
+    tabWrite.addEventListener("click", () => switchMobileTab("write"));
+    tabPreview.addEventListener("click", () => switchMobileTab("preview"));
   }
 
   // Security Gate
@@ -1651,11 +1734,9 @@ function initEventListeners() {
   });
 
   // Publish Success Modal Buttons
-  closeSuccessModalBtn?.addEventListener("click", () => {
-    publishSuccessModal.hidden = true;
-  });
+  closeSuccessModalBtn?.addEventListener("click", closePublishSuccessModal);
   publishSuccessModal?.addEventListener("click", (e) => {
-    if (e.target === publishSuccessModal) publishSuccessModal.hidden = true;
+    if (e.target === publishSuccessModal) closePublishSuccessModal();
   });
   copyPostLinkBtn?.addEventListener("click", async () => {
     const url = modalPostUrl.textContent;
@@ -1668,7 +1749,7 @@ function initEventListeners() {
     }
   });
   modalNewPostBtn?.addEventListener("click", () => {
-    publishSuccessModal.hidden = true;
+    closePublishSuccessModal();
     switchToNewPost();
   });
 
@@ -1681,6 +1762,12 @@ function initEventListeners() {
   function applyTheme(theme) {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("post-composer-theme", theme);
+    if (themeToggleBtn) {
+      const nextLabel = theme === "dark" ? "切换到浅色模式" : "切换到深色模式";
+      themeToggleBtn.setAttribute("aria-pressed", String(theme === "dark"));
+      themeToggleBtn.setAttribute("aria-label", nextLabel);
+      themeToggleBtn.title = nextLabel;
+    }
     if (themeToggleIcon) {
       themeToggleIcon.innerHTML = `<path d="${theme === "dark" ? sunIconPath : moonIconPath}"/>`;
     }

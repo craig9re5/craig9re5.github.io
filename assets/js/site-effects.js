@@ -14,15 +14,15 @@
     var ticking = false;
 
     function updateVisibility() {
-      if (window.scrollY > 300) {
-        btn.classList.add('is-visible');
-        btn.hidden = false;
-      } else {
-        btn.classList.remove('is-visible');
-        btn.hidden = true;
-      }
+      var visible = window.scrollY > 300;
+      btn.classList.toggle('is-visible', visible);
+      btn.setAttribute('aria-hidden', String(!visible));
+      btn.tabIndex = visible ? 0 : -1;
       ticking = false;
     }
+
+    btn.hidden = false;
+    updateVisibility();
 
     window.addEventListener(
       'scroll',
