@@ -11,16 +11,42 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
     {% seo %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&amp;family=Newsreader:ital,opsz,wght@0,6..72,300..800;1,6..72,300..800&amp;family=Noto+Sans+SC:wght@400;500;700&amp;family=Noto+Serif+JP:wght@500;700&amp;family=Noto+Serif+SC:wght@400;500;700&amp;display=swap">
-    <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: asset_version | relative_url }}">
-    <link rel="stylesheet" href="{{ '/assets/css/custom.css?v=' | append: asset_version | relative_url }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Outfit:wght@400;500;600;700;800&amp;family=Newsreader:ital,opsz,wght@0,6..72,300..800;1,6..72,300..800&amp;family=Noto+Sans+SC:wght@400;500;600;700&amp;family=Noto+Serif+JP:wght@500;700&amp;family=Noto+Serif+SC:wght@400;500;700&amp;display=swap">
+    <link id="css-classic-base" rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: asset_version | relative_url }}">
+    <link id="css-classic-custom" rel="stylesheet" href="{{ '/assets/css/custom.css?v=' | append: asset_version | relative_url }}">
+    <link id="css-editorial" rel="stylesheet" href="{{ '/assets/css/editorial-site.css?v=' | append: asset_version | relative_url }}">
     <link rel="alternate" type="application/rss+xml" title="{{ site.title | escape }}" href="{{ '/feed.xml' | relative_url }}">
     {% include favicon.html %}
     <script>
       (function () {
+        var root = document.documentElement;
+        var style = 'editorial';
+        try {
+          var params = new URLSearchParams(window.location.search);
+          var queryStyle = params.get('style');
+          if (queryStyle === 'classic' || queryStyle === 'editorial') {
+            style = queryStyle;
+          } else {
+            var savedStyle = localStorage.getItem('site-style');
+            if (savedStyle === 'classic' || savedStyle === 'editorial') {
+              style = savedStyle;
+            }
+          }
+        } catch (error) {
+          style = 'editorial';
+        }
+        root.setAttribute('data-style', style);
+        var classicA = document.getElementById('css-classic-base');
+        var classicB = document.getElementById('css-classic-custom');
+        var editorialCss = document.getElementById('css-editorial');
+        if (classicA) classicA.disabled = style !== 'classic';
+        if (classicB) classicB.disabled = style !== 'classic';
+        if (editorialCss) editorialCss.disabled = style !== 'editorial';
+
         var savedTheme = null;
         try {
           savedTheme = localStorage.getItem('theme');
@@ -28,9 +54,9 @@
           savedTheme = null;
         }
         if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-          document.documentElement.setAttribute('data-theme', 'dark');
+          root.setAttribute('data-theme', 'dark');
         } else {
-          document.documentElement.setAttribute('data-theme', 'light');
+          root.setAttribute('data-theme', 'light');
         }
       })();
     </script>
@@ -38,21 +64,30 @@
   <body class="page-lang-{{ current_lang | slugify }}{% if is_home_page %} page-home{% else %} page-interior{% endif %}" data-page-lang="{{ current_lang }}">
     <a id="skip-to-content" href="#content">Skip to content</a>
     <script src="{{ '/assets/js/local-post-visibility.js?v=' | append: asset_version | relative_url }}"></script>
-    <header class="page-header" role="banner">
+
+    <header class="page-header classic-only" role="banner">
       <p class="project-name">{{ site.title | default: site.github.repository_name }}</p>
       <p class="project-tagline" lang="{{ description_lang }}">{{ site.description | default: site.github.project_tagline }}</p>
     </header>
 
-    <main id="content" class="main-content" role="main">
-      {{ content }}
-      {% include site-footer.html %}
-    </main>
+    <div class="editorial-canvas">
+      <div class="editorial-sheet">
+        {% include editorial-header.html %}
+        <main id="content" class="main-content" role="main">
+          {{ content }}
+          {% include site-footer.html %}
+        </main>
+        {% include editorial-footer.html %}
+      </div>
+    </div>
 
     <button id="back-to-top" class="back-to-top" aria-label="Back to top" hidden>
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/>
       </svg>
     </button>
-    <script src="{{ '/assets/js/site-effects.js' | relative_url }}" defer></script>
+    <script src="{{ '/assets/js/site-theme.js?v=' | append: asset_version | relative_url }}" defer></script>
+    <script src="{{ '/assets/js/editorial-site.js?v=' | append: asset_version | relative_url }}" defer></script>
+    <script src="{{ '/assets/js/site-effects.js?v=' | append: asset_version | relative_url }}" defer></script>
   </body>
 </html>

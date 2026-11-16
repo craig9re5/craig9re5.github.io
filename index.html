@@ -4,76 +4,117 @@ title: Home
 lang: en-US
 ---
 
+{% assign public_posts = site.posts | where_exp: "item", "item.encrypted != true" %}
+{% assign featured_post = public_posts.first %}
+
 <section class="home-hero">
-  <h1 class="home-hero-title">Notes on code, projects, and ideas worth keeping.</h1>
-  <div class="hero-actions">
-    <a class="button-link" href="{{ '/about/' | relative_url }}">About Me</a>
-    <a class="button-link button-link-secondary" href="{{ '/archive/' | relative_url }}">Browse Archive</a>
-  </div>
-</section>
-
-<section class="content-section">
-  <div class="section-heading">
-    <div>
-      <p class="section-label">Latest writing</p>
-      <h2>Recent Posts</h2>
+  <div class="home-hero-grid">
+    <div class="home-hero-copy">
+      <nav class="ed-breadcrumbs editorial-only" aria-label="Breadcrumbs">
+        <ol>
+          <li><span>Blog</span></li>
+          <li><a href="{{ '/' | relative_url }}" aria-current="page">Overview</a></li>
+        </ol>
+      </nav>
+      <h1 class="home-hero-title">Notes on code, projects, and ideas worth keeping.</h1>
+      <p class="home-hero-lead editorial-only">Essays on architecture, engineering notes, everyday observations, and personal tools.</p>
+      <div class="hero-actions">
+        <a class="button-link" href="{{ '/about/' | relative_url }}">About Me</a>
+        <a class="button-link button-link-secondary" href="{{ '/archive/' | relative_url }}">Browse Archive</a>
+      </div>
     </div>
-    <a class="text-link" href="{{ '/archive/' | relative_url }}">View all posts</a>
-  </div>
 
-  {% if site.posts and site.posts.size > 0 %}
-  <div class="post-grid" data-local-post-list="home" data-visible-limit="3">
-    {% for post in site.posts %}
-    <article class="post-card" data-local-post-item data-post-file="{{ post.name | escape }}"{% if forloop.index > 3 %} hidden{% endif %}>
-      <p class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</p>
-      <h3><a href="{{ post.url | relative_url }}" lang="{{ post.lang | default: site.lang | default: 'en-US' }}">{{ post.title }}</a></h3>
-      {% assign card_excerpt = post.excerpt | strip_html | strip %}
-      {% if card_excerpt != "" %}
-      <p lang="{{ post.lang | default: site.lang | default: 'en-US' }}">{{ card_excerpt | truncate: 150 }}</p>
-      {% endif %}
+    {% if featured_post %}
+    <article class="home-hero-featured editorial-only" aria-label="Featured dispatch">
+      <div class="featured-card-top">
+        <span class="featured-kicker">LATEST ESSAY</span>
+        <time class="featured-date" datetime="{{ featured_post.date | date_to_xmlschema }}">{{ featured_post.date | date: "%b %-d, %Y" }}</time>
+      </div>
+      <h2 class="featured-title" lang="{{ featured_post.lang | default: site.lang | default: 'zh-Hans' }}">
+        <a class="card-link" href="{{ featured_post.url | relative_url }}">{{ featured_post.title }}</a>
+      </h2>
+      <div class="featured-meta">
+        {% if featured_post.tags and featured_post.tags.size > 0 %}
+        <span class="featured-tag">#{{ featured_post.tags.first }}</span>
+        {% endif %}
+        <span class="featured-arrow" aria-hidden="true">Read dispatch &rarr;</span>
+      </div>
     </article>
-    {% endfor %}
-  </div>
-  <p class="empty-state local-post-empty" data-local-post-empty hidden>All posts are hidden on this browser.</p>
-  {% else %}
-  <p class="empty-state">The archive is empty for now. The first post will show up here automatically.</p>
-  {% endif %}
-</section>
-
-<section class="content-section todo-section" id="todo-section">
-  <div class="section-heading todo-section-heading">
-    <div>
-      <p class="section-label">Local only</p>
-      <h2>TODO</h2>
-    </div>
-    <div class="todo-heading-actions">
-      <span class="todo-count-badge" id="todo-count-badge" hidden>0 tasks</span>
-      <button class="todo-toggle-btn" id="todo-toggle-btn" type="button" aria-expanded="true" aria-controls="home-todo-card">
-        <span class="todo-toggle-text">Collapse</span>
-        <svg class="todo-toggle-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-        </svg>
-      </button>
-    </div>
-  </div>
-
-  <div id="home-todo-card" class="todo-card" data-storage-key="home-todo-v1">
-    <form class="todo-form" novalidate>
-      <label class="todo-input-wrap" for="home-todo-input">
-        <span class="sr-only">Add a todo item</span>
-        <input id="home-todo-input" class="todo-input" name="todo" type="text" maxlength="180" placeholder="Add a task for this machine">
-      </label>
-      <label class="todo-due-field" for="home-todo-due">
-        <span class="todo-due-label">Due</span>
-        <input id="home-todo-due" class="todo-due-input" name="due" type="datetime-local" aria-label="Task deadline">
-      </label>
-      <button class="button-link todo-submit" type="submit">Add</button>
-    </form>
-
-    <p class="todo-status" role="status" aria-live="polite"></p>
-    <ul class="todo-list" aria-label="Local todo list"></ul>
-    <p class="todo-empty empty-state">No local tasks yet.</p>
+    {% endif %}
   </div>
 </section>
+
+<div class="home-sheet-body">
+  <section class="content-section">
+    <div class="section-heading">
+      <div>
+        <p class="section-label">Latest writing</p>
+        <h2>Recent Posts</h2>
+      </div>
+      <a class="text-link" href="{{ '/archive/' | relative_url }}">View all posts</a>
+    </div>
+
+    {% if site.posts and site.posts.size > 0 %}
+    <div class="post-grid" data-local-post-list="home" data-visible-limit="3">
+      {% for post in site.posts %}
+      <article class="post-card" data-local-post-item data-post-file="{{ post.name | escape }}"{% if forloop.index > 3 %} hidden{% endif %}>
+        <div class="post-card-top">
+          <p class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</p>
+          {% if post.encrypted %}
+          <span class="post-card-tag editorial-only">Encrypted</span>
+          {% elsif post.tags and post.tags.size > 0 %}
+          <span class="post-card-tag editorial-only">#{{ post.tags.first }}</span>
+          {% endif %}
+        </div>
+        <h3><a class="card-link" href="{{ post.url | relative_url }}" lang="{{ post.lang | default: site.lang | default: 'en-US' }}">{{ post.title }}</a></h3>
+        {% assign card_excerpt = post.excerpt | strip_html | strip %}
+        {% if card_excerpt != "" %}
+        <p lang="{{ post.lang | default: site.lang | default: 'en-US' }}">{{ card_excerpt | truncate: 150 }}</p>
+        {% endif %}
+      </article>
+      {% endfor %}
+    </div>
+    <p class="empty-state local-post-empty" data-local-post-empty hidden>All posts are hidden on this browser.</p>
+    {% else %}
+    <p class="empty-state">The archive is empty for now. The first post will show up here automatically.</p>
+    {% endif %}
+  </section>
+
+  <section class="content-section todo-section" id="todo-section">
+    <div class="section-heading todo-section-heading">
+      <div>
+        <p class="section-label">Local only</p>
+        <h2>TODO</h2>
+      </div>
+      <div class="todo-heading-actions">
+        <span class="todo-count-badge" id="todo-count-badge" hidden>0 tasks</span>
+        <button class="todo-toggle-btn" id="todo-toggle-btn" type="button" aria-expanded="true" aria-controls="home-todo-card">
+          <span class="todo-toggle-text">Collapse</span>
+          <svg class="todo-toggle-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div id="home-todo-card" class="todo-card" data-storage-key="home-todo-v1">
+      <form class="todo-form" novalidate>
+        <label class="todo-input-wrap" for="home-todo-input">
+          <span class="sr-only">Add a todo item</span>
+          <input id="home-todo-input" class="todo-input" name="todo" type="text" maxlength="180" placeholder="Add a task for this machine">
+        </label>
+        <label class="todo-due-field" for="home-todo-due">
+          <span class="todo-due-label">Due</span>
+          <input id="home-todo-due" class="todo-due-input" name="due" type="datetime-local" aria-label="Task deadline">
+        </label>
+        <button class="button-link todo-submit" type="submit">Add</button>
+      </form>
+
+      <p class="todo-status" role="status" aria-live="polite"></p>
+      <ul class="todo-list" aria-label="Local todo list"></ul>
+      <p class="todo-empty empty-state">No local tasks yet.</p>
+    </div>
+  </section>
+</div>
 
 <script src="{{ '/assets/js/home-todo.js' | relative_url }}"></script>

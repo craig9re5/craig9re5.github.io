@@ -3111,3 +3111,98 @@ html[data-theme="dark"] .site-nav .nav-composer-btn:hover {
     height: auto;
   }
 }
+
+/* ==========================================================================
+   Editorial Dual-Style Coexistence & About Me Style Switcher (Classic Mode)
+   ========================================================================== */
+.editorial-only {
+  display: none !important;
+}
+
+.archive-page .archive-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.about-style-bar {
+  margin-top: 1.15rem;
+  padding-top: 0.95rem;
+  border-top: 1px solid var(--line-soft);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem 1rem;
+}
+
+.about-style-copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.65rem;
+}
+
+.about-style-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.about-style-status {
+  font-size: 0.85rem;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.style-pill-group {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  gap: 0.2rem;
+}
+
+.style-pill-btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1;
+  min-height: 2.125rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.style-pill-btn:hover {
+  color: var(--text);
+}
+
+.style-pill-btn.is-active,
+.style-pill-btn[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: 0 2px 8px rgba(18, 63, 67, 0.2);
+}
+
+.style-pill-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+

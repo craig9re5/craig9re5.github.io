@@ -14,7 +14,16 @@
 
     var ticking = false;
 
+    function isEditorialStyle() {
+      return document.documentElement.getAttribute('data-style') === 'editorial';
+    }
+
     function updateBar() {
+      ticking = false;
+      if (isEditorialStyle()) {
+        bar.style.width = '';
+        return;
+      }
       var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
       var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
       if (height <= 0) {
@@ -23,12 +32,12 @@
         var scrolled = (winScroll / height) * 100;
         bar.style.width = Math.min(scrolled, 100) + '%';
       }
-      ticking = false;
     }
 
     window.addEventListener(
       'scroll',
       function () {
+        if (isEditorialStyle()) return;
         if (!ticking) {
           ticking = true;
           requestAnimationFrame(updateBar);
@@ -36,6 +45,16 @@
       },
       { passive: true }
     );
+
+    window.addEventListener('site:stylechange', function () {
+      if (isEditorialStyle()) {
+        bar.style.width = '';
+      } else {
+        updateBar();
+      }
+    });
+
+    updateBar();
   }
 
   /* ---------------- Local Post Edit Link ---------------- */
@@ -131,8 +150,30 @@
     });
   }
 
+  /* ---------------- Responsive Table Wrapper ---------------- */
+  function enhancePostTables() {
+    var tables = document.querySelectorAll('.post-body table');
+    tables.forEach(function (table, idx) {
+      if (table.closest('.table-wrapper')) return;
+      var wrapper = document.createElement('div');
+      wrapper.className = 'table-wrapper';
+      wrapper.setAttribute('tabindex', '0');
+      wrapper.setAttribute('role', 'region');
+      var caption = table.querySelector('caption');
+      if (caption) {
+        if (!caption.id) caption.id = 'ed-table-caption-' + (idx + 1);
+        wrapper.setAttribute('aria-labelledby', caption.id);
+      } else {
+        wrapper.setAttribute('aria-label', 'Scrollable data table');
+      }
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    });
+  }
+
   // Export for dynamic content (e.g. encrypted post decryption)
   window.enhanceCodeBlocks = enhanceCodeBlocks;
+  window.enhancePostTables = enhancePostTables;
 
   /* ---------------- Initialization ---------------- */
   if (document.readyState === 'loading') {
@@ -140,10 +181,12 @@
       initReadingProgress();
       initLocalEdit();
       enhanceCodeBlocks();
+      enhancePostTables();
     });
   } else {
     initReadingProgress();
     initLocalEdit();
     enhanceCodeBlocks();
+    enhancePostTables();
   }
 })();

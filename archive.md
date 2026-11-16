@@ -7,38 +7,60 @@ lang: en-US
 hide_page_heading: true
 ---
 
-<h1 class="sr-only">Archive</h1>
+<header class="archive-cover">
+  <div class="archive-cover-inner">
+    <nav class="ed-breadcrumbs editorial-only" aria-label="Breadcrumbs">
+      <ol>
+        <li><a href="{{ '/' | relative_url }}">Blog</a></li>
+        <li><a href="{{ '/archive/' | relative_url }}" aria-current="page">Archive</a></li>
+      </ol>
+    </nav>
+    <h1 class="archive-title">Archive</h1>
+    <p class="archive-lead editorial-only">{{ site.posts.size }} published essays, notes, and dispatches.</p>
 
-{% if site.posts.size > 0 %}
-<div class="archive-search-wrap">
-  <div class="archive-search-input-box">
-    <svg class="archive-search-icon" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-    </svg>
-    <input id="archive-search" type="search" placeholder="Search posts..." aria-label="Search posts">
-  </div>
-</div>
-
-<ul class="archive-list archive-timeline" data-local-post-list="archive">
-  {% for post in site.posts %}
-  <li class="archive-item" data-local-post-item data-post-file="{{ post.name | escape }}" data-search-text="{{ post.title | append: ' ' | append: post.excerpt | strip_html | downcase | escape }}">
-    <time class="archive-date" datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d, %Y" }}</time>
-    <div class="archive-entry">
-      <div class="archive-entry-head">
-        <a href="{{ post.url | relative_url }}" lang="{{ post.lang | default: 'en' }}">{{ post.title }}</a>
+    {% if site.posts.size > 0 %}
+    <search>
+      <div class="archive-search-wrap">
+        <div class="archive-search-input-box">
+          <svg class="archive-search-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+          </svg>
+          <input id="archive-search" type="search" placeholder="Search posts..." aria-label="Search posts" autocorrect="off" autocapitalize="none" spellcheck="false">
+        </div>
       </div>
-      {% assign archive_excerpt = post.excerpt | strip_html | strip %}
-      {% if archive_excerpt != "" %}
-      <p lang="{{ post.lang | default: 'en' }}">{{ archive_excerpt | truncate: 170 }}</p>
-      {% endif %}
-    </div>
-  </li>
-  {% endfor %}
-</ul>
-<p class="empty-state archive-filter-empty" id="archive-filter-empty" role="status" aria-live="polite" hidden>No posts match that search.</p>
-{% else %}
-<p class="empty-state">No posts yet. Add a Markdown file to the _posts folder and it will appear here automatically.</p>
-{% endif %}
+    </search>
+    {% endif %}
+  </div>
+</header>
+
+<div class="archive-body-band">
+  {% if site.posts.size > 0 %}
+  <ul class="archive-list archive-timeline" data-local-post-list="archive">
+    {% for post in site.posts %}
+    <li class="archive-item" data-local-post-item data-post-file="{{ post.name | escape }}" data-search-text="{{ post.title | append: ' ' | append: post.excerpt | strip_html | downcase | escape }}">
+      <time class="archive-date" datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d, %Y" }}</time>
+      <div class="archive-entry">
+        <div class="archive-entry-head">
+          <a href="{{ post.url | relative_url }}" lang="{{ post.lang | default: 'en' }}">{{ post.title }}</a>
+          {% if post.encrypted %}
+          <span class="archive-item-badge editorial-only">Encrypted</span>
+          {% elsif post.tags and post.tags.size > 0 %}
+          <span class="archive-item-badge editorial-only">#{{ post.tags.first }}</span>
+          {% endif %}
+        </div>
+        {% assign archive_excerpt = post.excerpt | strip_html | strip %}
+        {% if archive_excerpt != "" %}
+        <p lang="{{ post.lang | default: 'en' }}">{{ archive_excerpt | truncate: 170 }}</p>
+        {% endif %}
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  <p class="empty-state archive-filter-empty" id="archive-filter-empty" role="status" aria-live="polite" hidden>No posts match that search.</p>
+  {% else %}
+  <p class="empty-state">No posts yet. Add a Markdown file to the _posts folder and it will appear here automatically.</p>
+  {% endif %}
+</div>
 
 <script>
   (function () {

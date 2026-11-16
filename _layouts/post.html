@@ -5,7 +5,6 @@ layout: default
 {% include site-nav.html %}
 
 {% assign current_lang = page.lang | default: site.lang | default: 'en' %}
-
 {% assign clean_content = content | strip_html %}
 {% assign word_count = clean_content | number_of_words %}
 {% assign char_count = clean_content | size %}
@@ -18,12 +17,45 @@ layout: default
   {% assign count_stat = word_count | append: " words" %}
   {% assign reading_stat = est_minutes | append: " min read" %}
 {% endif %}
+{% assign canonical_post_url = site.url | append: page.url %}
+{% assign primary_category = page.breadcrumb_category %}
+{% if primary_category == nil or primary_category == "" %}
+  {% if page.tags and page.tags.size > 0 %}
+    {% assign primary_category = page.tags.first | capitalize %}
+  {% else %}
+    {% assign primary_category = 'Essays' %}
+  {% endif %}
+{% endif %}
 
 <div id="reading-progress" class="reading-progress" aria-hidden="true"></div>
 
 <article class="page-shell post-shell" lang="{{ current_lang }}">
-    <header class="page-heading page-heading-post">
-        <div class="post-header-meta">
+  <header class="page-heading page-heading-post">
+    <div class="post-hero-container">
+      <div class="post-hero-grid{% if page.hero_image %} has-media{% endif %}">
+        <div class="post-hero-copy">
+          <nav class="ed-breadcrumbs editorial-only" aria-label="Breadcrumbs">
+            <ol>
+              <li><a href="{{ '/' | relative_url }}">Blog</a></li>
+              <li><a href="{{ '/archive/' | relative_url }}">{{ primary_category }}</a></li>
+              <li><a href="{{ page.url | relative_url }}" aria-current="page">{{ page.title | truncate: 28 }}</a></li>
+            </ol>
+          </nav>
+
+          <h1 id="article-title" tabindex="-1">{{ page.title }}</h1>
+
+          <div class="post-header-meta">
+            <img
+              class="ed-author-avatar editorial-only"
+              src="{{ '/assets/avatar-favicon.png' | relative_url }}"
+              alt=""
+              width="28"
+              height="28"
+              decoding="async"
+            >
+            <span class="ed-author-name editorial-only">{{ page.author | default: site.title }}</span>
+            <span class="ed-meta-pipe editorial-only" aria-hidden="true"></span>
+            <span class="ed-published-prefix editorial-only">Published on</span>
             <time class="post-date" datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %-d, %Y" }}</time>
             {% unless page.encrypted %}
             <span class="meta-sep" aria-hidden="true">&bull;</span>
@@ -31,66 +63,210 @@ layout: default
             <span class="meta-sep" aria-hidden="true">&bull;</span>
             <span class="post-reading-time">{{ reading_stat }}</span>
             {% endunless %}
+          </div>
+
+          <div class="post-local-edit" id="post-local-edit" data-post-file="{{ page.name | escape }}" hidden>
+            <a class="button-link button-link-secondary post-local-edit-link" href="http://127.0.0.1:4173/post-composer.html">编辑此文</a>
+            <p>仅在本地预览环境显示，点击后会打开本地发帖器并载入当前 Markdown。</p>
+          </div>
         </div>
-        <h1>{{ page.title }}</h1>
-    </header>
 
-    <div class="post-local-edit" id="post-local-edit" data-post-file="{{ page.name | escape }}" hidden>
-        <a class="button-link button-link-secondary post-local-edit-link" href="http://127.0.0.1:4173/post-composer.html">编辑此文</a>
-        <p>仅在本地预览环境显示，点击后会打开本地发帖器并载入当前 Markdown。</p>
-    </div>
-
-    {% if page.encrypted %}
-    <div id="encrypted-warning" class="encrypted-warning-box" lang="zh-Hans">
-        <div class="lock-icon">🔒</div>
-        <h3>该文章已被加密保护</h3>
-        <p>请输入访问密码以查看内容：</p>
-        <div class="password-input-row">
-            <label class="sr-only" for="decrypt-password-input">访问密码</label>
-            <input class="decrypt-password-input" type="password" id="decrypt-password-input" placeholder="输入密码…" autocomplete="current-password" aria-describedby="decrypt-error-msg" autofocus />
-            <button class="button-link decrypt-button" id="decrypt-btn" type="button">确认解密</button>
+        {% if page.hero_image %}
+        <div class="post-hero-media editorial-only">
+          <figure class="post-hero-figure">
+            <img
+              class="post-hero-image"
+              src="{{ page.hero_image | relative_url }}"
+              alt="{{ page.hero_image_alt | default: page.title | escape }}"
+              width="{{ page.hero_image_width | default: 1024 }}"
+              height="{{ page.hero_image_height | default: 1024 }}"
+              fetchpriority="high"
+              decoding="async"
+            >
+          </figure>
         </div>
-        <p id="decrypt-error-msg" class="decrypt-error" role="alert" aria-live="assertive" hidden>密码错误，请重新输入。</p>
+        {% endif %}
+      </div>
     </div>
-    
-    <div id="decrypted-post-body" class="post-body" style="display: none; opacity: 0; transition: opacity 0.4s ease;"></div>
-    {% else %}
-    <div class="post-body">
-        {{ content }}
-    </div>
-    {% endif %}
+  </header>
 
-    {% if page.previous or page.next %}
-    <nav class="post-nav" aria-label="Post navigation">
-        {% if page.previous %}
-        <a class="post-nav-card post-nav-prev" href="{{ page.previous.url | relative_url }}" rel="prev">
-            <span class="post-nav-label">
+  <div class="post-reading-band">
+    <div class="post-reading-container">
+      <div class="post-reading-layout">
+        <aside class="post-rail editorial-only" aria-label="Article navigation and actions">
+          <div class="rail-sticky">
+            <section class="share-block" aria-labelledby="share-heading">
+              <h2 id="share-heading" class="rail-heading">Share this Article</h2>
+              <div class="share-actions">
+                <span class="copy-control">
+                  <button
+                    type="button"
+                    class="rail-icon-btn copy-button"
+                    command="--copy"
+                    commandfor="ed-share-url"
+                    aria-label="Copy article link"
+                  >
+                    <svg class="icon-copy" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <svg class="icon-check" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                      <path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                  <span class="copy-tip" role="status"></span>
+                </span>
+                <input
+                  id="ed-share-url"
+                  class="visually-hidden"
+                  type="text"
+                  value="{{ canonical_post_url | escape }}"
+                  readonly
+                  tabindex="-1"
+                  aria-hidden="true"
+                >
+
+                <a
+                  class="rail-icon-btn"
+                  href="https://twitter.com/intent/tweet?text={{ page.title | url_encode }}&amp;url={{ canonical_post_url | url_encode }}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Share on X (opens in a new tab)"
+                >
+                  <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" fill="currentColor"/>
+                  </svg>
+                </a>
+
+                <a
+                  class="rail-icon-btn"
+                  href="mailto:?subject={{ page.title | url_encode }}&amp;body={{ canonical_post_url | url_encode }}"
+                  aria-label="Share via email"
+                >
+                  <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                    <rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.9"/>
+                    <path d="m3.5 7 8.5 6 8.5-6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </a>
+              </div>
+            </section>
+
+            <section class="ed-toc-card" id="ed-toc-card" aria-labelledby="ed-toc-heading" hidden>
+              <h2 id="ed-toc-heading" class="rail-heading">In this Article</h2>
+              <nav class="ed-toc-nav" aria-label="In this Article">
+                <ol id="ed-toc-list" class="ed-toc-list"></ol>
+              </nav>
+            </section>
+
+            <section class="ed-rail-card" aria-labelledby="ed-rail-card-heading">
+              <div class="ed-rail-card-art" aria-hidden="true">
+                <svg viewBox="0 0 120 44" width="120" height="44">
+                  <rect x="6" y="8" width="46" height="28" rx="5" fill="currentColor" fill-opacity="0.08" stroke="currentColor" stroke-opacity="0.18"/>
+                  <line x1="13" y1="16" x2="43" y2="16" stroke="currentColor" stroke-opacity="0.35" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="13" y1="23" x2="36" y2="23" stroke="currentColor" stroke-opacity="0.22" stroke-width="2" stroke-linecap="round"/>
+                  <rect x="60" y="8" width="52" height="28" rx="5" fill="#2A6B66" fill-opacity="0.14" stroke="#2A6B66" stroke-opacity="0.35"/>
+                  <circle cx="72" cy="22" r="5.5" fill="#C45D44" fill-opacity="0.8"/>
+                  <line x1="83" y1="18" x2="103" y2="18" stroke="currentColor" stroke-opacity="0.4" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="83" y1="25" x2="98" y2="25" stroke="currentColor" stroke-opacity="0.22" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <p class="ed-rail-kicker">{{ primary_category | upcase }}</p>
+              <h2 id="ed-rail-card-heading" class="ed-rail-card-title">{{ site.title | default: 'Craig Tateishi' }}</h2>
+              {% if page.tags and page.tags.size > 0 %}
+              <div class="ed-rail-tags">
+                {% for tag in page.tags limit: 4 %}
+                <span class="ed-rail-tag">#{{ tag }}</span>
+                {% endfor %}
+              </div>
+              {% else %}
+              <p class="ed-rail-card-desc">Published on {{ page.date | date: "%B %-d, %Y" }}</p>
+              {% endif %}
+              <div class="ed-rail-actions">
+                <a class="ed-rail-btn" href="{{ '/archive/' | relative_url }}">
+                  <span>All Posts</span>
+                  <span aria-hidden="true">&rarr;</span>
+                </a>
+              </div>
+            </section>
+          </div>
+        </aside>
+
+        <div class="post-main-column">
+          {% if page.encrypted %}
+          <div id="encrypted-warning" class="encrypted-warning-box" lang="zh-Hans">
+            <div class="lock-icon" aria-hidden="true">🔒</div>
+            <h3>该文章已被加密保护</h3>
+            <p>请输入访问密码以查看内容：</p>
+            <div class="password-input-row">
+              <label class="sr-only" for="decrypt-password-input">访问密码</label>
+              <input
+                class="decrypt-password-input"
+                type="password"
+                id="decrypt-password-input"
+                placeholder="输入密码…"
+                autocomplete="current-password"
+                autocorrect="off"
+                autocapitalize="none"
+                spellcheck="false"
+                aria-invalid="false"
+                data-error="decrypt-error-msg"
+                autofocus
+              />
+              <button class="button-link decrypt-button" id="decrypt-btn" type="button">确认解密</button>
+            </div>
+            <p id="decrypt-error-msg" class="decrypt-error" role="alert" aria-live="assertive" hidden>密码错误，请重新输入。</p>
+          </div>
+
+          <div id="decrypted-post-body" class="post-body" lang="{{ current_lang }}" style="display: none; opacity: 0; transition: opacity 0.4s ease;"></div>
+          {% else %}
+          <div class="post-body" id="post-content-body" lang="{{ current_lang }}">
+            {{ content }}
+          </div>
+          {% endif %}
+
+          {% if page.tags and page.tags.size > 0 %}
+          <ul class="post-tags-bar editorial-only" role="list" aria-label="Article tags">
+            {% for tag in page.tags %}
+            <li><span class="ed-tag-pill">#{{ tag }}</span></li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+
+          {% if page.previous or page.next %}
+          <nav class="post-nav" aria-label="Post navigation">
+            {% if page.previous %}
+            <a class="post-nav-card post-nav-prev" href="{{ page.previous.url | relative_url }}" rel="prev">
+              <span class="post-nav-label">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
                 <span>Previous Post</span>
-            </span>
-            <span class="post-nav-title">{{ page.previous.title }}</span>
-        </a>
-        {% else %}
-        <div class="post-nav-placeholder" aria-hidden="true"></div>
-        {% endif %}
+              </span>
+              <span class="post-nav-title">{{ page.previous.title }}</span>
+            </a>
+            {% else %}
+            <div class="post-nav-placeholder" aria-hidden="true"></div>
+            {% endif %}
 
-        {% if page.next %}
-        <a class="post-nav-card post-nav-next" href="{{ page.next.url | relative_url }}" rel="next">
-            <span class="post-nav-label">
+            {% if page.next %}
+            <a class="post-nav-card post-nav-next" href="{{ page.next.url | relative_url }}" rel="next">
+              <span class="post-nav-label">
                 <span>Next Post</span>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
-            </span>
-            <span class="post-nav-title">{{ page.next.title }}</span>
-        </a>
-        {% else %}
-        <div class="post-nav-placeholder" aria-hidden="true"></div>
-        {% endif %}
-    </nav>
-    {% endif %}
+              </span>
+              <span class="post-nav-title">{{ page.next.title }}</span>
+            </a>
+            {% else %}
+            <div class="post-nav-placeholder" aria-hidden="true"></div>
+            {% endif %}
+          </nav>
+          {% endif %}
 
-    <div id="comments-wrapper" {% if page.encrypted %}style="display: none; opacity: 0; transition: opacity 0.4s ease;"{% endif %}>
-        {% include comments-giscus.html lang=current_lang %}
+          <div id="comments-wrapper" {% if page.encrypted %}style="display: none; opacity: 0; transition: opacity 0.4s ease;"{% endif %}>
+            {% include comments-giscus.html lang=current_lang %}
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </article>
 
 <script src="{{ '/assets/js/post-page.js' | relative_url }}" defer></script>
@@ -112,31 +288,45 @@ layout: default
     const decryptBtn = document.getElementById("decrypt-btn");
     const errorMsg = document.getElementById("decrypt-error-msg");
 
+    function syncErrorState(isError) {
+      passwordInput.setAttribute("aria-invalid", isError ? "true" : "false");
+      if (isError) {
+        passwordInput.setAttribute("aria-describedby", "decrypt-error-msg");
+      } else {
+        passwordInput.removeAttribute("aria-describedby");
+      }
+      errorMsg.hidden = !isError;
+    }
+
     function doDecrypt() {
       const password = passwordInput.value.trim();
-      if (!password) return;
+      if (!password) {
+        syncErrorState(true);
+        passwordInput.focus();
+        return;
+      }
 
       try {
         const bytes = CryptoJS.AES.decrypt(ciphertext, password);
         const decrypted = bytes.toString(CryptoJS.enc.Utf8);
         if (decrypted.startsWith(ENCRYPTED_SIG + "\n")) {
           const rawMarkdown = decrypted.slice((ENCRYPTED_SIG + "\n").length);
-          // Render Markdown to HTML
           const renderedHtml = renderMarkdown(rawMarkdown);
-          
-          // Inject into body
+
           decryptedBody.innerHTML = renderedHtml;
-          
-          // Hide password card, show decrypted content and comments with fade-in animation
           decryptWarning.style.display = "none";
           decryptedBody.style.display = "block";
-          
-          // Enhance decrypted code blocks
+
           if (typeof window.enhanceCodeBlocks === "function") {
             window.enhanceCodeBlocks();
           }
+          if (typeof window.enhancePostTables === "function") {
+            window.enhancePostTables();
+          }
+          if (typeof window.refreshEditorialToc === "function") {
+            window.refreshEditorialToc();
+          }
 
-          // Trigger CSS transition
           setTimeout(() => {
             decryptedBody.style.opacity = "1";
             if (commentsWrapper) {
@@ -146,18 +336,15 @@ layout: default
               }, 50);
             }
           }, 50);
-          
-          errorMsg.hidden = true;
-          passwordInput.setAttribute("aria-invalid", "false");
+
+          syncErrorState(false);
           return;
         }
       } catch (e) {
-        // failed
+        // decryption failed
       }
 
-      // Show error, shake input box for micro-interaction
-      errorMsg.hidden = false;
-      passwordInput.setAttribute("aria-invalid", "true");
+      syncErrorState(true);
       passwordInput.classList.add("shake-animation");
       setTimeout(() => {
         passwordInput.classList.remove("shake-animation");
@@ -165,8 +352,13 @@ layout: default
     }
 
     decryptBtn.addEventListener("click", doDecrypt);
+    passwordInput.addEventListener("input", function () {
+      if (passwordInput.getAttribute("aria-invalid") === "true") {
+        syncErrorState(false);
+      }
+    });
     passwordInput.addEventListener("keydown", function (e) {
-      if (e.key === "Enter") {
+      if (e.key === "Enter" && !e.isComposing) {
         doDecrypt();
       }
     });
