@@ -41,9 +41,22 @@
         <li><a href="{{ '/archive/' | relative_url }}" {% if page.url == '/archive/' %}aria-current="page"{% endif %}>Archive</a></li>
         <li><a href="{{ '/about/' | relative_url }}" {% if page.url == '/about/' %}aria-current="page"{% endif %}>About</a></li>
         <li>
-          <a href="https://craig9re5.github.io/SwimLibrary/" target="_blank" rel="noopener noreferrer">Library</a>
+          <a
+            class="ed-library-link"
+            href="https://craig9re5.github.io/SwimLibrary/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Library — 拾页书馆 (opens in a new tab)"
+          >
+            <span class="ed-library-mark" aria-hidden="true"></span>
+            <span class="ed-library-text">Library</span>
+            <span class="ed-library-sub editorial-menu-sub" aria-hidden="true">拾页书馆</span>
+            <svg class="ed-library-arrow" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+              <path d="M5 11 11 5M6.5 5H11v4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
         </li>
-        <li class="ed-nav-dropdown">
+        <li class="ed-nav-dropdown" hidden>
           <button
             id="ed-posts-trigger"
             class="ed-dropdown-trigger"

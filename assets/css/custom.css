@@ -3131,10 +3131,15 @@ html[data-theme="dark"] .site-nav .nav-composer-btn:hover {
   border: 0;
 }
 
+.about-interface-band .about-interface-card {
+  padding: 0.95rem var(--space-panel-inline);
+  min-height: auto;
+}
+
 .about-style-bar {
-  margin-top: 1.15rem;
-  padding-top: 0.95rem;
-  border-top: 1px solid var(--line-soft);
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -3157,10 +3162,10 @@ html[data-theme="dark"] .site-nav .nav-composer-btn:hover {
   color: var(--muted);
 }
 
-.about-style-status {
+.about-style-desc {
   font-size: 0.85rem;
-  color: var(--text);
-  font-weight: 500;
+  color: var(--muted);
+  font-weight: 400;
 }
 
 .style-pill-group {

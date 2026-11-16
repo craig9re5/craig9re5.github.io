@@ -445,6 +445,70 @@
     }
   }
 
+  .ed-library-link {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start !important;
+    gap: 0.5rem !important;
+  }
+
+  .ed-library-mark {
+    position: relative;
+    inline-size: 0.88rem;
+    block-size: 0.94rem;
+    flex: none;
+    color: var(--ink-accent);
+
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      inline-size: 0.5rem;
+      block-size: 0.68rem;
+      border: 1.4px solid currentColor;
+      border-radius: 2px 3px 3px 2px;
+      transform-origin: bottom left;
+      transition: transform var(--dur-base) var(--ease-out);
+    }
+
+    &::before {
+      inset-block-start: 0.04rem;
+      inset-inline-start: 0.04rem;
+      background-color: var(--bg-sheet);
+      opacity: 0.68;
+      transform: rotate(-8deg);
+    }
+
+    &::after {
+      inset-inline-end: 0.04rem;
+      inset-block-end: 0.02rem;
+      background-color: color-mix(in srgb, var(--ink-accent) 16%, var(--bg-sheet));
+      transform: rotate(2deg);
+    }
+  }
+
+  .ed-library-arrow {
+    flex: none;
+    opacity: 0.55;
+    transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-fast) var(--ease-out);
+  }
+
+  .ed-library-link:hover,
+  .ed-library-link:focus-visible {
+    & .ed-library-mark::before {
+      transform: translate(-0.06rem, -0.03rem) rotate(-13deg);
+    }
+
+    & .ed-library-mark::after {
+      transform: translate(0.05rem, -0.02rem) rotate(5deg);
+    }
+
+    & .ed-library-arrow {
+      opacity: 0.95;
+      transform: translate(1.5px, -1.5px);
+    }
+  }
+
   .site-header.is-wide {
     & .menu-button {
       display: none;
@@ -482,6 +546,23 @@
     & .site-menu > li > .dropdown-trigger:hover {
       background-color: var(--bg-chip);
       color: var(--ink-primary);
+    }
+
+    & .site-menu > li > a.ed-library-link {
+      padding-inline: 0.78rem;
+      min-block-size: 2.35rem;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background-color: var(--bg-sheet);
+      color: var(--ink-primary);
+      font-weight: 500;
+
+      &:hover,
+      &:focus-visible {
+        background-color: var(--bg-sheet);
+        border-color: color-mix(in srgb, var(--ink-accent) 48%, var(--border-ui));
+        color: var(--ink-accent);
+      }
     }
 
     & .dropdown-list[popover] {

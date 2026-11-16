@@ -7,60 +7,69 @@ lang: en-US
 hide_page_heading: true
 ---
 
-<header class="about-cover editorial-only">
-  <div class="about-cover-inner">
-    <nav class="ed-breadcrumbs" aria-label="Breadcrumbs">
-      <ol>
-        <li><a href="{{ '/' | relative_url }}">Blog</a></li>
-        <li><a href="{{ '/about/' | relative_url }}" aria-current="page">About Me</a></li>
-      </ol>
-    </nav>
-    <p class="about-cover-kicker">Profile &amp; Interface</p>
-  </div>
-</header>
-
 <section class="about-profile">
   <div class="about-card about-card-primary about-profile-card">
-    <div class="about-profile-header">
-      <p class="about-eyebrow">Profile</p>
+    <nav class="ed-breadcrumbs editorial-only" aria-label="Breadcrumbs">
+      <ol>
+        <li><a href="{{ '/' | relative_url }}">Blog</a></li>
+        <li><a href="{{ '/about/' | relative_url }}" aria-current="page">About</a></li>
+      </ol>
+    </nav>
 
-      <div class="about-profile-identity">
-        <div class="about-profile-copy">
+    <div class="about-profile-identity">
+      <div class="about-profile-copy">
+        <div class="about-profile-header">
+          <p class="about-eyebrow">Profile</p>
           <h1 class="about-name" lang="ja">クレゴ</h1>
-          <blockquote class="about-quote" lang="zh-Hans">我现在已经不做自己的梦了，有时候我觉得我是你。</blockquote>
         </div>
-        <div class="about-avatar-shell">
-          <img class="about-avatar" src="{{ '/assets/avatar-favicon.png' | relative_url }}" alt="Profile photo of Kurego">
+        <blockquote class="about-quote" lang="zh-Hans">我现在已经不做自己的梦了，有时候我觉得我是你。</blockquote>
+
+        <div class="about-contact-row" aria-label="Contact links">
+          <a class="about-icon-link" href="https://github.com/craig9re5" target="_blank" rel="noreferrer" aria-label="GitHub">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 2C6.48 2 2 6.58 2 12.23c0 4.52 2.87 8.35 6.84 9.7.5.1.68-.22.68-.49 0-.24-.01-1.03-.01-1.86-2.78.62-3.37-1.21-3.37-1.21-.46-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.9 1.56 2.35 1.11 2.92.85.09-.67.35-1.11.63-1.37-2.22-.26-4.55-1.14-4.55-5.09 0-1.13.39-2.06 1.03-2.79-.1-.26-.45-1.31.1-2.73 0 0 .84-.27 2.75 1.06A9.3 9.3 0 0 1 12 6.84c.85 0 1.71.12 2.5.36 1.9-1.33 2.74-1.06 2.74-1.06.56 1.42.21 2.47.11 2.73.64.73 1.03 1.66 1.03 2.79 0 3.96-2.33 4.82-4.56 5.08.36.32.68.95.68 1.92 0 1.39-.01 2.5-.01 2.84 0 .27.18.59.69.49A10.26 10.26 0 0 0 22 12.23C22 6.58 17.52 2 12 2Z"/>
+            </svg>
+          </a>
+          <a class="about-icon-link" href="mailto:craig9re5@gmail.com" aria-label="Email Craig">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3.75 5.5h16.5A1.75 1.75 0 0 1 22 7.25v9.5a1.75 1.75 0 0 1-1.75 1.75H3.75A1.75 1.75 0 0 1 2 16.75v-9.5A1.75 1.75 0 0 1 3.75 5.5Zm0 1.5a.25.25 0 0 0-.25.25v.24l8.16 5.62a.99.99 0 0 0 1.13 0l8.16-5.62v-.24a.25.25 0 0 0-.25-.25H3.75Zm17.25 2.31-7.31 5.04a2.49 2.49 0 0 1-2.82 0L3.56 9.31v7.44c0 .14.11.25.25.25h16.38a.25.25 0 0 0 .25-.25V9.31Z"/>
+            </svg>
+          </a>
+          <a class="about-icon-link" href="https://space.bilibili.com/1005535595" target="_blank" rel="noreferrer" aria-label="Bilibili">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.858 0 17.347v-7.36c.036-1.511.556-2.765 1.56-3.76 1.004-.996 2.262-1.52 3.773-1.574h.774l-1.174-1.12a1.234 1.234 0 0 1-.373-.906c0-.356.124-.658.373-.907l.027-.027c.267-.249.573-.373.92-.373.347 0 .653.124.92.373L9.653 4.44c.071.071.134.142.187.213h4.267a.836.836 0 0 1 .16-.213l2.853-2.747c.267-.249.573-.373.92-.373.347 0 .662.151.929.4.267.249.391.551.391.907 0 .355-.124.657-.373.906zM5.333 7.24c-.746.018-1.373.276-1.88.773-.506.498-.769 1.13-.786 1.894v7.52c.017.764.28 1.395.786 1.893.507.498 1.134.756 1.88.773h13.334c.746-.017 1.373-.275 1.88-.773.506-.498.769-1.129.786-1.893v-7.52c-.017-.765-.28-1.396-.786-1.894-.507-.497-1.134-.755-1.88-.773zM8 11.107c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c0-.373.129-.689.386-.947.258-.257.574-.386.947-.386zm8 0c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c.017-.391.129-.689.4-.947.249-.249.56-.373.933-.373Z"/>
+            </svg>
+          </a>
         </div>
       </div>
-    </div>
 
-    <div class="about-contact-row" aria-label="Contact links">
-      <a class="about-icon-link" href="https://github.com/craig9re5" target="_blank" rel="noreferrer" aria-label="GitHub">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 2C6.48 2 2 6.58 2 12.23c0 4.52 2.87 8.35 6.84 9.7.5.1.68-.22.68-.49 0-.24-.01-1.03-.01-1.86-2.78.62-3.37-1.21-3.37-1.21-.46-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.9 1.56 2.35 1.11 2.92.85.09-.67.35-1.11.63-1.37-2.22-.26-4.55-1.14-4.55-5.09 0-1.13.39-2.06 1.03-2.79-.1-.26-.45-1.31.1-2.73 0 0 .84-.27 2.75 1.06A9.3 9.3 0 0 1 12 6.84c.85 0 1.71.12 2.5.36 1.9-1.33 2.74-1.06 2.74-1.06.56 1.42.21 2.47.11 2.73.64.73 1.03 1.66 1.03 2.79 0 3.96-2.33 4.82-4.56 5.08.36.32.68.95.68 1.92 0 1.39-.01 2.5-.01 2.84 0 .27.18.59.69.49A10.26 10.26 0 0 0 22 12.23C22 6.58 17.52 2 12 2Z"/>
-        </svg>
-      </a>
-      <a class="about-icon-link" href="mailto:craig9re5@gmail.com" aria-label="Email Craig">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M3.75 5.5h16.5A1.75 1.75 0 0 1 22 7.25v9.5a1.75 1.75 0 0 1-1.75 1.75H3.75A1.75 1.75 0 0 1 2 16.75v-9.5A1.75 1.75 0 0 1 3.75 5.5Zm0 1.5a.25.25 0 0 0-.25.25v.24l8.16 5.62a.99.99 0 0 0 1.13 0l8.16-5.62v-.24a.25.25 0 0 0-.25-.25H3.75Zm17.25 2.31-7.31 5.04a2.49 2.49 0 0 1-2.82 0L3.56 9.31v7.44c0 .14.11.25.25.25h16.38a.25.25 0 0 0 .25-.25V9.31Z"/>
-        </svg>
-      </a>
-      <a class="about-icon-link" href="https://space.bilibili.com/1005535595" target="_blank" rel="noreferrer" aria-label="Bilibili">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.858 0 17.347v-7.36c.036-1.511.556-2.765 1.56-3.76 1.004-.996 2.262-1.52 3.773-1.574h.774l-1.174-1.12a1.234 1.234 0 0 1-.373-.906c0-.356.124-.658.373-.907l.027-.027c.267-.249.573-.373.92-.373.347 0 .653.124.92.373L9.653 4.44c.071.071.134.142.187.213h4.267a.836.836 0 0 1 .16-.213l2.853-2.747c.267-.249.573-.373.92-.373.347 0 .662.151.929.4.267.249.391.551.391.907 0 .355-.124.657-.373.906zM5.333 7.24c-.746.018-1.373.276-1.88.773-.506.498-.769 1.13-.786 1.894v7.52c.017.764.28 1.395.786 1.893.507.498 1.134.756 1.88.773h13.334c.746-.017 1.373-.275 1.88-.773.506-.498.769-1.129.786-1.893v-7.52c-.017-.765-.28-1.396-.786-1.894-.507-.497-1.134-.755-1.88-.773zM8 11.107c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c0-.373.129-.689.386-.947.258-.257.574-.386.947-.386zm8 0c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c.017-.391.129-.689.4-.947.249-.249.56-.373.933-.373Z"/>
-        </svg>
-      </a>
-    </div>
-
-    <div class="about-style-bar" role="region" aria-label="Reading style switcher">
-      <div class="about-style-copy">
-        <span class="about-style-label" id="about-style-label">Style</span>
-        <span class="about-style-status" id="style-status-note">期刊纸面</span>
+      <div class="about-avatar-shell">
+        <img class="about-avatar" src="{{ '/assets/avatar-favicon.png' | relative_url }}" alt="Profile photo of Kurego">
       </div>
-      <div class="style-pill-group" role="group" aria-labelledby="about-style-label">
-        <button type="button" class="style-pill-btn" data-style-option="editorial" aria-pressed="true">Editorial</button>
-        <button type="button" class="style-pill-btn" data-style-option="classic" aria-pressed="false">Classic</button>
+    </div>
+  </div>
+</section>
+
+<section class="about-interface-band" aria-labelledby="about-interface-heading">
+  <div class="about-interface-container">
+    <div class="section-heading editorial-only">
+      <div>
+        <p class="section-label">Interface</p>
+        <h2 id="about-interface-heading">Reading Style</h2>
+      </div>
+      <span class="about-style-badge" id="style-status-note">期刊纸面</span>
+    </div>
+
+    <div class="about-card about-interface-card">
+      <div class="about-style-bar" role="region" aria-label="Reading style switcher">
+        <div class="about-style-copy">
+          <span class="about-style-label" id="about-style-label">Style</span>
+          <span class="about-style-desc">在 Editorial 刊物纸面与 Classic 玻璃拟态之间即时切换，偏好将跨页记住。</span>
+        </div>
+        <div class="style-pill-group" role="group" aria-labelledby="about-style-label">
+          <button type="button" class="style-pill-btn" data-style-option="editorial" aria-pressed="true">Editorial</button>
+          <button type="button" class="style-pill-btn" data-style-option="classic" aria-pressed="false">Classic</button>
+        </div>
       </div>
     </div>
   </div>
