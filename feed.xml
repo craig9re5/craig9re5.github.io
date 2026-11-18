@@ -4,6 +4,11 @@ layout: null
 <?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
+    {% if site.site_closed %}
+    <title>{{ site.site_closed_message | default: 'This site is temporarily closed.' | xml_escape }}</title>
+    <description>{{ site.site_closed_message | default: 'This site is temporarily closed.' | xml_escape }}</description>
+    <link>{{ site.url }}{{ '/' | relative_url }}</link>
+    {% else %}
     <title>{{ site.title | xml_escape }}</title>
     <description>{{ site.description | xml_escape }}</description>
     <link>{{ site.url }}{{ '/' | relative_url }}</link>
@@ -23,5 +28,6 @@ layout: null
       {% endfor %}
     </item>
     {% endfor %}
+    {% endif %}
   </channel>
 </rss>

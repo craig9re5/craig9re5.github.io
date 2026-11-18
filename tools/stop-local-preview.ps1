@@ -21,7 +21,7 @@ function Test-SitePreview {
 
   try {
     $response = Invoke-WebRequest -UseBasicParsing -Uri "http://127.0.0.1:$Port/" -TimeoutSec 2
-    return $response.StatusCode -eq 200 -and $response.Content.Contains('id="nav-composer-link"')
+    return $response.StatusCode -eq 200 -and ($response.Content.Contains('id="nav-composer-link"') -or $response.Content.Contains('data-site-closed="true"'))
   } catch {
     return $false
   }

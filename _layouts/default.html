@@ -1,3 +1,6 @@
+{% if site.site_closed -%}
+{% include site-closed.html %}
+{%- else -%}
 {% assign current_lang = page.lang | default: site.lang | default: 'en' %}
 {% assign description_lang = site.description_lang | default: current_lang %}
 {% assign is_home_page = false %}
@@ -91,3 +94,4 @@
     <script src="{{ '/assets/js/site-effects.js?v=' | append: asset_version | relative_url }}" defer></script>
   </body>
 </html>
+{%- endif %}

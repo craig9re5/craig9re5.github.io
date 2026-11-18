@@ -5,6 +5,7 @@ sitemap: false
 ---
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  {% unless site.site_closed %}
   <url>
     <loc>{{ '/' | absolute_url }}</loc>
   </url>
@@ -20,4 +21,5 @@ sitemap: false
     <lastmod>{{ post.date | date_to_xmlschema }}</lastmod>
   </url>
   {% endfor %}
+  {% endunless %}
 </urlset>

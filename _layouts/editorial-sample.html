@@ -1,3 +1,6 @@
+{% if site.site_closed -%}
+{% include site-closed.html %}
+{%- else -%}
 {% assign current_lang = page.lang | default: site.lang | default: 'zh-Hans' %}
 {% assign content_lang = page.content_lang | default: current_lang %}
 {% assign asset_version = site.time | date: '%s' %}
@@ -362,3 +365,4 @@
     <script src="{{ '/assets/js/editorial-sample.js?v=' | append: asset_version | relative_url }}" defer></script>
   </body>
 </html>
+{%- endif %}

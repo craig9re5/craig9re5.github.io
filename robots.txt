@@ -4,6 +4,10 @@ permalink: /robots.txt
 sitemap: false
 ---
 User-agent: *
+{% if site.site_closed -%}
+Disallow: /
+{%- else -%}
 Allow: /
 
 Sitemap: {{ '/sitemap.xml' | absolute_url }}
+{%- endif %}

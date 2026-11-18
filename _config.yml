@@ -4,6 +4,8 @@ description_lang: ja
 url: https://craig9re5.github.io
 baseurl: ""
 lang: en-US
+site_closed: true
+site_closed_message: "This site is temporarily closed."
 avatar_url: "https://avatars.githubusercontent.com/u/200924220?s=400&u=b3885895e64a7b94b007e42ef446a49b895ede6e&v=4"
 theme: jekyll-theme-cayman
 show_downloads: false

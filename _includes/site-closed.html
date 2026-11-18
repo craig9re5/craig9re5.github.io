@@ -1,0 +1,81 @@
+{% assign closed_message = site.site_closed_message | default: 'This site is temporarily closed.' -%}
+<!DOCTYPE html>
+<html lang="en" data-site-closed="true">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <meta name="robots" content="noindex, nofollow">
+    <title>{{ closed_message | escape }}</title>
+    <style>
+      :root {
+        --closed-bg-light: #f7f6f3;
+        --closed-bg-dark: #141413;
+        --closed-ink-light: #2a2926;
+        --closed-ink-dark: #e6e3dc;
+        --closed-bg: var(--closed-bg-light);
+        --closed-ink: var(--closed-ink-light);
+        color-scheme: light dark;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --closed-bg: var(--closed-bg-dark);
+          --closed-ink: var(--closed-ink-dark);
+        }
+      }
+
+      @supports (color: light-dark(white, black)) {
+        :root {
+          --closed-bg: light-dark(var(--closed-bg-light), var(--closed-bg-dark));
+          --closed-ink: light-dark(var(--closed-ink-light), var(--closed-ink-dark));
+        }
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        min-block-size: 100vh;
+        min-block-size: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: 1.5rem;
+        background-color: var(--closed-bg);
+        color: var(--closed-ink);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      main {
+        max-inline-size: 60ch;
+        text-align: center;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(1.0625rem, 0.95rem + 0.5vw, 1.375rem);
+        font-weight: 500;
+        letter-spacing: -0.01em;
+        line-height: 1.5;
+        text-wrap: balance;
+        overflow-wrap: break-word;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>{{ closed_message | escape }}</h1>
+    </main>
+  </body>
+</html>

@@ -2,7 +2,7 @@
 layout: null
 permalink: /composer/posts.json
 ---
-[
+[{% unless site.site_closed %}
   {% for post in site.posts %}
     {
       "fileName": "{{ post.relative_path | remove: '_posts/' }}",
@@ -14,4 +14,4 @@ permalink: /composer/posts.json
       "encrypted": {% if post.encrypted %}true{% else %}false{% endif %}
     }{% unless forloop.last %},{% endunless %}
   {% endfor %}
-]
+{% endunless %}]
